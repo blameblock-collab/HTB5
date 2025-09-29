@@ -10,25 +10,26 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         
         body {
-            /* --- Dark Theme Background --- */
+            /* --- Dark Theme Background: #000000 (Black) --- */
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* GitHub Dark Base */
+            background-color: #000000; 
             color: #e5e7eb; /* Light Gray Text */
             min-height: 100vh;
             margin: 0;
         }
         
-        /* 🌟🌟🌟 최종 해결책: Fixed Header 높이(h-16 = 4rem = 64px)만큼 본문을 강제적으로 밀어냅니다. 🌟🌟🌟 */
+        /* 🌟🌟🌟 Fixed Header 높이(h-16 = 4rem = 64px)만큼 본문을 강제적으로 밀어냅니다. 🌟🌟🌟 */
         #main-content-area {
             /* !important를 사용하여 다른 스타일과의 충돌을 완전히 방지합니다. */
-            padding-top: 4rem !important; 
+            padding-top: 6rem !important; 
         }
 
-        /* 기타 스타일 (유지) */
-        .gacha-card, .detail-container {
-            border: 1px solid #374151; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
-            background-color: #1f2937; 
+        /* 기타 스타일 (새로운 테마 적용) */
+        .gacha-card, .detail-container, .admin-form {
+            /* 카드 배경색: #1A1A1A */
+            border: 1px solid #333333; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); 
+            background-color: #1A1A1A; 
             position: relative; 
             border-radius: 1rem;
         }
@@ -44,7 +45,8 @@
             position: absolute;
             width: 80%; 
             height: 80%;
-            background-color: #1f2937; 
+            /* 카드 배경색과 동일하게 설정 */
+            background-color: #1A1A1A; 
             border-radius: 50%;
             z-index: 2;
             display: flex;
@@ -55,7 +57,7 @@
             text-shadow: none;
         }
         
-        /* 랭크별 스타일 정의 */
+        /* 랭크별 스타일 정의 (색상 유지 또는 조정) */
         .rank-S { background-color: #8b5cf6; color: #f3e8ff; border-color: #c4b5fd; } 
         .rank-A { background-color: #3b82f6; color: #eff6ff; border-color: #93c5fd; } 
         .rank-B { background-color: #10b981; color: #ecfdf5; border-color: #6ee7b7; } 
@@ -66,10 +68,10 @@
         .ranking-tile {
             cursor: pointer;
             transition: background-color 0.1s, transform 0.1s;
-            background-color: #1f2937; 
+            background-color: #1A1A1A; /* 카드 배경 사용 */
         }
         .ranking-tile:hover {
-            background-color: #374151; 
+            background-color: #2e2e2e; /* 호버 시 약간 밝게 */
             transform: scale(1.01);
         }
 
@@ -86,7 +88,7 @@
         }
         .grade-mystic-text {
             background-clip: text; -webkit-background-clip: text; color: transparent;
-            background-image: linear-gradient(to right, #38bdf8, #8b5cf6, #ec4899); /* Rainbow mix */
+            background-image: linear-gradient(to right, #38bdf8, #794CFF, #BDF200); /* Purple/Lime Mix */
             font-weight: bold;
         }
     </style>
@@ -95,77 +97,100 @@
             theme: {
                 extend: {
                     colors: {
-                        'primary-dark': '#0d1117',
-                        'card-bg': '#1f2937',
-                        'accent': '#ef4444', 
-                        'gold': '#f59e0b',
+                        'primary-base': '#000000',     // 검정 (Main Background)
+                        'card-bg': '#1A1A1A',          // 매우 어두운 회색 (Container/Card Background)
+                        'main-purple': '#794CFF',      // 메인 보라색 (Primary Accent)
+                        'point-lime': '#BDF200',       // 포인트 연두색 (Secondary Accent / XP / Success)
+                        'main-purple-dark': '#663CE8', // 메인 보라색의 어두운 버전 (Hover/Border)
+                        'point-lime-dark': '#99CC00',  // 포인트 연두색의 어두운 버전 (Gradient End)
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-primary-base">
 
     <!-- 고정된 상단 메뉴바 (Navbar) -->
-    <!-- h-16 (64px) 높이, fixed로 화면에 고정 -->
-    <header class="fixed top-0 left-0 w-full bg-gray-900 shadow-xl z-50 transition-all duration-300 h-16">
+    <header class="fixed top-0 left-0 w-full bg-primary-base shadow-xl z-50 transition-all duration-300 h-16 border-b border-gray-900">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-full"> 
-                <!-- 메인 타이틀/로고 -->
-                <div class="flex-shrink-0">
-                    <a href="#ranking" onclick="navigateToRanking()" class="text-3xl font-extrabold tracking-wider text-red-600 hover:text-red-500 transition duration-300">
+                <!-- 메인 타이틀/로고 및 User ID -->
+                <div class="flex flex-col justify-center h-full pt-4">
+                    <a href="#ranking" onclick="navigateToRanking()" class="text-2xl font-extrabold tracking-wider text-main-purple hover:text-main-purple-dark transition duration-300">
                         HUNTER THE BEGINNG 5
                     </a>
+                    <!-- 사용자 ID 및 관리자 상태 표시 영역 -->
+                    <span id="user-id-display" class="text-[10px] text-gray-500 truncate mt-[-2px] block">
+                        로딩 중...
+                    </span>
                 </div>
 
                 <!-- 메뉴 항목 -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#ranking" onclick="navigateToRanking()" class="text-gray-300 hover:bg-gray-800 hover:text-red-400 px-3 py-2 rounded-lg text-lg font-medium transition duration-200">
-                            RANKING
-                        </a>
-                        <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-red-400 px-3 py-2 rounded-lg text-lg font-medium transition duration-200">
-                            SHOP
-                        </a>
-                        <button class="bg-red-700 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg ml-4 transition duration-200 shadow-md hover:shadow-lg">
-                            로그인
-                        </button>
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <!-- 관리자 모드 버튼 (관리자일 때만 표시) -->
+                    <a href="#admin" id="admin-link" onclick="navigateToAdmin()" class="hidden text-point-lime hover:bg-card-bg hover:text-point-lime px-3 py-2 rounded-lg text-lg font-medium transition duration-200">
+                        ADMIN
+                    </a>
+                    
+                    <a href="#ranking" onclick="navigateToRanking()" class="text-gray-300 hover:bg-card-bg hover:text-point-lime px-3 py-2 rounded-lg text-lg font-medium transition duration-200 hidden md:inline-block">
+                        RANKING
+                    </a>
+                    <!-- 로그인/관리자 인증 버튼 -->
+                    <button onclick="showAdminLoginModal()" class="bg-main-purple hover:opacity-80 text-white font-semibold py-2 px-4 rounded-lg ml-4 transition duration-200 shadow-lg">
+                        로그인
+                    </button>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- 🌟🌟🌟 #main-content-area ID 부여 및 pt-16 제거 (CSS에서 강제 지정) 🌟🌟🌟 -->
+    <!-- 메인 컨텐츠 영역 -->
     <main id="main-content-area" class="p-4 md:p-6 flex justify-center">
 
-        <!-- 메인 컨테이너: 최대 가로 xl (768px)로 확장 및 중앙 정렬 -->
         <div class="w-full max-w-xl">
             <!-- SPA 뷰 컨테이너 -->
             <div id="app-view-container">
-                <!-- 랭킹 목록 또는 상세 정보가 여기에 로드됩니다. -->
+                <!-- 랭킹 목록 또는 상세 정보, 관리자 폼이 여기에 로드됩니다. -->
             </div>
             
             <!-- 로딩 인디케이터 (다크 테마에 맞게 조정) -->
-            <div id="loading-indicator" class="text-center p-8 bg-gray-800 text-gray-400 rounded-xl shadow-md hidden">
-                <div class="animate-spin inline-block w-6 h-6 border-4 border-red-500 border-t-transparent rounded-full mr-2"></div>
+            <div id="loading-indicator" class="text-center p-8 bg-card-bg text-gray-400 rounded-xl shadow-md hidden">
+                <div class="animate-spin inline-block w-6 h-6 border-4 border-point-lime border-t-transparent rounded-full mr-2"></div>
                 캐릭터 데이터를 데이터베이스에서 불러오는 중...
             </div>
             
             <!-- 카피라이트 문구 (Dark Theme Adaptation) -->
-            <p class="mt-8 pt-4 text-xs text-center text-gray-600 border-t border-gray-700">
+            <p class="mt-8 pt-4 text-xs text-center text-gray-600 border-t border-gray-800">
                 &copy; 2025 HUNTER THE BEGINNING 5
             </p>
 
         </div>
     </main>
+    
+    <!-- 🌟 관리자 로그인 모달 (Admin Login Modal) 🌟 -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-black bg-opacity-80 z-[100] hidden flex items-center justify-center p-4" onclick="if(event.target.id === 'admin-login-modal') hideAdminLoginModal()">
+        <div class="bg-card-bg p-6 rounded-xl shadow-2xl border border-main-purple max-w-sm w-full transition-all duration-300 transform scale-95" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold text-main-purple mb-4">관리자 로그인</h3>
+            <p class="text-sm text-gray-400 mb-4">관리자 페이지에 접근하려면 비밀번호를 입력하세요.</p>
+            <input type="password" id="admin-password-input" placeholder="관리자 비밀번호" class="w-full p-3 mb-4 rounded-lg bg-gray-900 text-white border border-gray-700 focus:border-point-lime focus:ring-point-lime" onkeydown="if(event.key === 'Enter') processAdminLogin()">
+            <div id="admin-error-message" class="text-red-400 text-sm mb-4 hidden"></div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="hideAdminLoginModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">취소</button>
+                <button onclick="processAdminLogin()" class="bg-main-purple hover:opacity-80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">로그인</button>
+            </div>
+        </div>
+    </div>
+    <!-- 🌟 캐릭터 저장 성공/실패 메시지 🌟 -->
+    <div id="message-box" class="fixed bottom-4 right-4 p-3 rounded-lg shadow-xl text-white transform translate-x-full transition-transform duration-500 z-[99]">
+    </div>
+
 
     <!-- Firebase 및 메인 스크립트 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDocs, onSnapshot, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDocs, onSnapshot, runTransaction, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // 디버깅을 위해 Firestore 로그 레벨 설정
@@ -183,6 +208,10 @@
         let currentFilterType = 'all'; 
         let currentFilterValue = null; 
         
+        // 🌟 관리자 상태 플래그 및 모의 비밀번호
+        let isAdmin = false;
+        const MOCK_ADMIN_PASSWORD = "admin123"; 
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -211,6 +240,9 @@
             "첫 번째 발자국": { name: "첫 번째 발자국", effect: "행운 +5", icon: "👣", grade: "유니크" },
             "칭호 없음": { name: "칭호 없음", effect: "효과 없음", icon: "👤", grade: "일반" }
         };
+        
+        // 칭호 목록을 배열로 변환
+        const ALL_TITLE_ARRAY = Object.values(ALL_TITLES);
 
 
         // --------------------------------------------------------
@@ -255,7 +287,7 @@
         // --- 4. 초기 데이터 ---
         // --------------------------------------------------------
         const INITIAL_MOCK_DATA = [
-            { id: 1, affiliation: "백두 길드", title: "친구 살해자", name: "홍길동", totalXp: 350, hpCurrent: 35, hpMax: 50, gold: 5500, goldAccumulated: 25000, stats: { 근력: 20, 지능: 8, 민첩: 22, 행운: 8, 이성: 3 }, resistance: ["태양", "파도"], status: ["광란", "회귀중독"], 
+            { id: 'char1', affiliation: "백두 길드", title: "친구 살해자", name: "홍길동", totalXp: 350, hpCurrent: 35, hpMax: 50, gold: 5500, goldAccumulated: 25000, stats: { 근력: 20, 지능: 8, 민첩: 22, 행운: 8, 이성: 3 }, resistance: ["태양", "파도"], status: ["광란", "회귀중독"], 
                 items: [
                     { name: "낡은 단검", effect: "근력+5", iconUrl: "https://placehold.co/16x16/f59e0b/FFFFFF?text=SW", grade: "레어" }, 
                     { name: "신비한 포션", effect: "HP+20", grade: "일반" }, 
@@ -267,7 +299,7 @@
                 ],
                 icon: "⚔️", rankingScore: 0 
             },
-            { id: 2, affiliation: "헌터관리청", title: "검은 비명", name: "김철수", totalXp: 500, hpCurrent: 50, hpMax: 50, gold: 12500, goldAccumulated: 45000, stats: { 근력: 40, 지능: 5, 민첩: 8, 행운: 2, 이성: 1 }, resistance: ["밤", "대지"], status: ["살해 충동"], 
+            { id: 'char2', affiliation: "헌터관리청", title: "검은 비명", name: "김철수", totalXp: 500, hpCurrent: 50, hpMax: 50, gold: 12500, goldAccumulated: 45000, stats: { 근력: 40, 지능: 5, 민첩: 8, 행운: 2, 이성: 1 }, resistance: ["밤", "대지"], status: ["살해 충동"], 
                 items: [
                     { name: "대지의 방패", effect: "체력+30", iconUrl: "https://placehold.co/16x16/10b981/FFFFFF?text=SH", grade: "레전더리" }, 
                     { name: "어둠의 돌", "effect": "민첩-2", grade: "일반" }
@@ -279,7 +311,7 @@
                 ],
                 icon: "💀", rankingScore: 0 
             },
-            { id: 3, affiliation: "무소속", title: "고요한 사냥꾼", name: "이지아", totalXp: 550, hpCurrent: 10, hpMax: 50, gold: 800, goldAccumulated: 15000, stats: { 근력: 3, 지능: 18, 민첩: 40, 행운: 20, 이성: 10 }, resistance: ["폭풍", "파도", "태양", "밤", "대지"], status: [], 
+            { id: 'char3', affiliation: "무소속", title: "고요한 사냥꾼", name: "이지아", totalXp: 550, hpCurrent: 10, hpMax: 50, gold: 800, goldAccumulated: 15000, stats: { 근력: 3, 지능: 18, 민첩: 40, 행운: 20, 이성: 10 }, resistance: ["폭풍", "파도", "태양", "밤", "대지"], status: [], 
                 items: [
                     { name: "바람의 활", effect: "민첩+10", grade: "레어" }, 
                     { name: "깃털 망토", effect: "행운+5", grade: "미스틱" }
@@ -307,6 +339,8 @@
                 }
 
                 userId = auth.currentUser.uid;
+                // 사용자 ID를 화면에 표시합니다.
+                document.getElementById('user-id-display').textContent = `User ID: ${userId} ${isAdmin ? '(ADMIN)' : ''}`;
                 
                 await seedDatabase(userId);
                 listenForCharacters(userId);
@@ -331,6 +365,7 @@
                             const rankingScore = (charData.totalXp || 0) * 10 + (charData.gold || 0);
                             transaction.set(docRef, {...charData, rankingScore});
                         }
+                        console.log("데이터베이스에 초기 데이터가 시딩되었습니다.");
                     } else {
                         for (const charData of INITIAL_MOCK_DATA) {
                             const docRef = doc(charCollectionRef, String(charData.id));
@@ -348,6 +383,7 @@
                                 rankingScore: rankingScore
                             });
                         }
+                        console.log("기존 데이터가 업데이트되었습니다.");
                     }
                 });
             } catch (e) {
@@ -358,10 +394,12 @@
         // --- 6. 헬퍼 함수 (Level, Rank, Navigation, Filter 등) ---
 
         function getCollectionPath(uid) {
-            return `artifacts/${appId}/users/${uid}/characters`;
+            // 모든 사용자가 공유하는 'public' 영역에 저장 (협업 환경을 위해)
+            return `artifacts/${appId}/public/data/characters`;
         }
         
         function calculateLevelAndRank(totalXp) {
+            // 기존 함수 (생략)
             let result = {
                 level: 1, rank: 'F', xpCurrent: totalXp, xpNext: 30, xpProgress: 0
             };
@@ -424,6 +462,7 @@
                 });
                 
                 characters = newCharacters; 
+                console.log(`Firestore에서 ${characters.length}개의 캐릭터 데이터가 실시간으로 로드되었습니다.`);
                 router();
 
             }, (error) => {
@@ -438,16 +477,59 @@
             
             if (!appContainer) return;
             appContainer.innerHTML = ''; 
-
+            
+            // 관리자 링크 표시 여부 업데이트
+            document.getElementById('admin-link').classList.toggle('hidden', !isAdmin);
+            
             if (hash.startsWith('#detail=')) {
                 selectedCharId = hash.substring(8);
                 renderDetailView(selectedCharId);
+            } else if (hash === '#admin') {
+                if (isAdmin) {
+                    renderAdminView();
+                } else {
+                    navigateToRanking();
+                    showMessage("관리자 권한이 없습니다. 먼저 로그인 해주세요.", 'error');
+                }
             } else {
                 currentView = 'ranking';
                 selectedCharId = null;
                 renderRankingView();
             }
         }
+        
+        // --- 7. 관리자 모달 및 인증 로직 ---
+        
+        function showAdminLoginModal() {
+            document.getElementById('admin-password-input').value = '';
+            document.getElementById('admin-error-message').classList.add('hidden');
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+        }
+
+        function hideAdminLoginModal() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+        }
+
+        window.processAdminLogin = function() {
+            const input = document.getElementById('admin-password-input').value;
+            const errorMessage = document.getElementById('admin-error-message');
+
+            if (input === MOCK_ADMIN_PASSWORD) {
+                isAdmin = true;
+                hideAdminLoginModal();
+                document.getElementById('user-id-display').textContent = `User ID: ${userId} (ADMIN)`;
+                showMessage("관리자 권한 획득! Admin 메뉴가 활성화됩니다.", 'success');
+                navigateToAdmin();
+            } else {
+                errorMessage.textContent = "비밀번호가 올바르지 않습니다.";
+                errorMessage.classList.remove('hidden');
+            }
+        }
+        window.showAdminLoginModal = showAdminLoginModal;
+        window.hideAdminLoginModal = hideAdminLoginModal;
+
+
+        // --- 8. 네비게이션 및 메시지 함수 ---
 
         function navigateToDetail(charId) {
             window.location.hash = `detail=${charId}`;
@@ -457,8 +539,48 @@
             window.location.hash = '#ranking';
         }
 
+        function navigateToAdmin() {
+            if (isAdmin) {
+                window.location.hash = '#admin';
+            } else {
+                showMessage("관리자 권한이 필요합니다.", 'error');
+            }
+        }
+
         window.navigateToDetail = navigateToDetail;
         window.navigateToRanking = navigateToRanking;
+        window.navigateToAdmin = navigateToAdmin;
+        
+        function showMessage(message, type = 'info') {
+            const box = document.getElementById('message-box');
+            let bgColor = 'bg-gray-700';
+            let textColor = 'text-white';
+            
+            if (type === 'success') {
+                // 포인트 컬러 (연두색) 배경, 검정 텍스트
+                bgColor = 'bg-point-lime';
+                textColor = 'text-black';
+            } else if (type === 'error') {
+                // 에러는 빨간색 유지
+                bgColor = 'bg-red-600';
+                textColor = 'text-white';
+            }
+            
+            box.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-xl ${textColor} transform translate-x-full transition-transform duration-500 z-[99] ${bgColor}`;
+            box.textContent = message;
+            
+            // Show
+            setTimeout(() => {
+                box.classList.remove('translate-x-full');
+            }, 50);
+            
+            // Hide
+            setTimeout(() => {
+                box.classList.add('translate-x-full');
+            }, 3000);
+        }
+        window.showMessage = showMessage; 
+
         
         function applyFilter(type, value) {
             if (value === 'all' || value === '') {
@@ -486,7 +608,9 @@
         }
         window.handleFilterChange = handleFilterChange;
 
-        // --- 7. 랭킹 뷰 렌더링 ---
+
+        // --- 9. 랭킹 뷰 렌더링 (기존 함수 유지) ---
+        // ... (renderRankChange, renderFilterDropdowns, renderRankingView 함수 생략 - 기능 동일) ...
         
         function renderRankChange(change) {
             const absChange = Math.abs(change);
@@ -496,7 +620,7 @@
 
             if (change > 0) {
                 text = `↑ ${absChange}`;
-                colorClass = 'text-green-500'; 
+                colorClass = 'text-point-lime'; 
                 tooltip = `${absChange}단계 상승`;
             } else if (change < 0) {
                 text = `↓ ${absChange}`;
@@ -524,11 +648,11 @@
 
 
             return `
-                <div class="flex gap-3 mb-4 p-3 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
+                <div class="flex gap-3 mb-4 p-3 bg-card-bg border border-gray-700 rounded-xl shadow-md">
                     
                     <div class="flex-1 min-w-0">
                         <label for="filter-affiliation" class="block text-xs font-semibold text-gray-300 mb-1">소속별 보기</label>
-                        <select id="filter-affiliation" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-accent focus:ring-accent p-2 border bg-gray-900 text-gray-200 shadow-sm">
+                        <select id="filter-affiliation" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-point-lime focus:ring-point-lime p-2 border bg-gray-900 text-gray-200 shadow-sm">
                             <option value="all" ${currentFilterType === 'all' || currentFilterType === 'rank' ? 'selected' : ''}>전체 소속</option>
                             ${affiliationOptions}
                         </select>
@@ -536,7 +660,7 @@
 
                     <div class="flex-1 min-w-0">
                         <label for="filter-rank" class="block text-xs font-semibold text-gray-300 mb-1">랭크별 보기</label>
-                        <select id="filter-rank" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-accent focus:ring-accent p-2 border bg-gray-900 text-gray-200 shadow-sm">
+                        <select id="filter-rank" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-point-lime focus:ring-point-lime p-2 border bg-gray-900 text-gray-200 shadow-sm">
                             <option value="all" ${currentFilterType === 'all' || currentFilterType === 'affiliation' ? 'selected' : ''}>전체 랭크</option>
                             ${rankOptions}
                         </select>
@@ -563,7 +687,7 @@
 
 
             const headerHtml = `
-                <div class="flex justify-between items-center mb-4 p-3 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
+                <div class="flex justify-between items-center mb-4 p-3 bg-card-bg border border-gray-700 rounded-xl shadow-md">
                     <h2 class="text-xl font-bold text-white">헌터 랭킹 목록</h2> 
                 </div>
                 ${filterDropdownsHtml}
@@ -582,7 +706,7 @@
                 let rankTextColor = 'text-gray-400';
                 let rankClasses = 'text-xl font-bold';
                 if (index + 1 === 1) { 
-                    rankTextColor = 'text-yellow-400'; 
+                    rankTextColor = 'text-point-lime'; 
                     rankClasses = 'text-3xl font-extrabold';
                 } else if (index + 1 === 2) { 
                     rankTextColor = 'text-gray-300'; 
@@ -596,7 +720,7 @@
 
                 return `
                     <div 
-                        class="ranking-tile flex items-center p-3 mb-2 bg-gray-800 rounded-xl shadow-md border border-gray-700 font-semibold hover:bg-gray-700"
+                        class="ranking-tile flex items-center p-3 mb-2 rounded-xl shadow-md border border-gray-800 font-semibold hover:bg-gray-900"
                         data-char-id="${item.id}" onclick="navigateToDetail('${item.id}')"
                     >
                         <!-- 1. 순위 -->
@@ -626,11 +750,11 @@
                             <!-- 헌터 포인트 -->
                             <div class="flex flex-col items-end flex-grow min-w-0">
                                 <span class="text-[10px] text-gray-500 uppercase leading-none whitespace-nowrap">헌터 포인트</span>
-                                <span class="text-lg font-extrabold text-white truncate">${xpDisplay}</span>
+                                <span class="text-lg font-extrabold text-point-lime truncate">${xpDisplay}</span>
                             </div>
 
                             <!-- 클릭 아이콘 -->
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-red-500 ml-2 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-main-purple ml-2 flex-shrink-0">
                                 <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.58 9.5l-4.35-4.21a.75.75 0 111.04-1.08l5 4.87a.75.75 0 010 1.08l-5 4.87a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                             </svg>
                         </div>
@@ -638,129 +762,18 @@
                 `;
             }).join('');
 
-            appContainer.innerHTML = headerHtml + `<div id="ranking-list" class="mt-4 space-y-3">${rankingList.length > 0 ? rankingHtml : '<p class="text-center p-8 text-gray-400 bg-gray-800 rounded-xl shadow-md">표시할 캐릭터가 없습니다.</p>'}</div>`;
+            appContainer.innerHTML = headerHtml + `<div id="ranking-list" class="mt-4 space-y-3">${rankingList.length > 0 ? rankingHtml : '<p class="text-center p-8 text-gray-400 bg-card-bg rounded-xl shadow-md">표시할 캐릭터가 없습니다.</p>'}</div>`;
         }
         
 
-        // --- 8. 상세 뷰 렌더링 (보유 칭호 탭 추가) ---
-
-        function renderDetailView(charId) {
-            const appContainer = document.getElementById('app-view-container');
-            const char = characters.find(c => String(c.id) === charId);
-
-            if (!char) {
-                appContainer.innerHTML = `<p class="text-center p-8 text-white">캐릭터 ID ${charId}를 찾을 수 없습니다. <button onclick="navigateToRanking()" class="text-red-500 underline">랭킹으로 돌아가기</button></p>`;
-                return;
-            }
-
-            const statBonuses = calculateStatBonuses(char.items);
-            const totalStats = char.stats || {};
-            
-            const equippedTitle = ALL_TITLES[char.title] || ALL_TITLES["칭호 없음"];
-            const titleText = equippedTitle.name;
-            const titleGradeClass = RARITY_STYLES[equippedTitle.grade].gradeClass; 
-
-
-            const detailHtml = `
-                <div class="detail-container p-5 md:p-6 flex flex-col space-y-4">
-                    
-                    <div class="flex justify-start items-start border-b border-gray-700 pb-2 mb-1">
-                        <button onclick="navigateToRanking()" class="text-gray-400 hover:text-red-500 transition duration-150 flex items-center text-xs font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1">
-                                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.02 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.04.02z" clip-rule="evenodd" />
-                            </svg>
-                            랭킹 목록으로
-                        </button>
-                    </div>
-
-                    <!-- 1. 기본 정보 헤더 -->
-                    <div class="text-center">
-                        <p class="text-base font-extrabold mb-1 ${titleGradeClass}">${titleText}</p> 
-                        <h2 class="text-3xl font-extrabold text-white">${char.name || '이름 없음'}</h2>
-                        <p class="text-xs text-gray-400 mt-1">
-                            <span class="font-bold text-red-500">${char.affiliation || '미상'}</span> 
-                            | 헌터 포인트: ${char.totalXp.toLocaleString()}
-                        </p>
-                    </div>
-
-                    <!-- 2. 핵심 스탯 게이지 -->
-                    <div class="flex justify-around items-center p-3 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
-                        
-                        <!-- 헌터 랭크 Ring -->
-                        <div class="flex flex-col items-center">
-                            <p class="text-xs text-center text-amber-400 font-semibold mb-1">헌터 랭크</p>
-                            ${renderCircularProgress(char.rank, 1, 'rank')} 
-                        </div>
-                        
-                        <!-- 레벨(EXP) Ring -->
-                        <div class="flex flex-col items-center">
-                            <p class="text-xs text-center text-emerald-400 font-semibold mb-1">레벨</p>
-                            ${renderCircularProgress(char.xpCurrent || 0, char.xpNext || 1, 'xp', char.level || 1)}
-                        </div>
-                        
-                        <!-- HP Ring -->
-                        <div class="flex flex-col items-center">
-                            <p class="text-xs text-center text-red-500 font-semibold mb-1">체력</p>
-                            ${renderCircularProgress(char.hpCurrent || 0, char.hpMax || 1, 'hp')}
-                        </div>
-                    </div>
-                    
-                    <!-- 3. 상세 스탯 -->
-                    <div class="grid grid-cols-1 gap-3">
-                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">기본 스탯 (아이템 보너스)</p>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                                ${renderStats(totalStats, statBonuses)}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 4. 속성 저항 및 상태이상 -->
-                    <div class="grid grid-cols-1 gap-3">
-                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">속성 저항</p>
-                            <div class="flex overflow-x-auto whitespace-nowrap text-sm min-h-[30px] py-1">
-                                ${renderResistance(char.resistance)}
-                            </div>
-                        </div>
-                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">상태이상</p>
-                            <div class="min-h-[30px] py-1">
-                                ${renderStatus(char.status)}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 5. 소지품/아이템 목록 -->
-                    <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                        <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">소지 아이템 목록</p>
-                        <div class="space-y-1">
-                            ${renderItemsDetail(char.items, char.gold, char.goldAccumulated)}
-                        </div>
-                    </div>
-
-                    <!-- 6. 보유 칭호 목록 -->
-                    <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
-                        <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">보유 칭호 목록</p>
-                        <div class="space-y-1">
-                            ${renderTitlesDetail(char.titles, char.title)}
-                        </div>
-                    </div>
-
-                </div>
-            `;
-            
-            appContainer.innerHTML = detailHtml;
-        }
-
-
-        // --- 9. 렌더링 도우미 함수 ---
+        // --- 10. 상세 뷰 렌더링 (기존 함수 유지) ---
+        // ... (renderDetailView, renderCircularProgress, calculateStatBonuses, renderStats, formatGold, renderResistance, renderStatus, renderItemsDetail, renderTitlesDetail 함수 생략 - 기능 동일) ...
         
         function renderCircularProgress(current, max, type, auxiliaryValue = null) {
             let percentage = 0;
             let progressColorStart, progressColorEnd, combinedText;
 
-            const trackColor = '#374151'; 
+            const trackColor = '#333333'; // 어두운 트랙 색상
             
             const rankGradientColors = {
                 'S': { start: '#c084fc', end: '#a855f7' }, 
@@ -773,14 +786,14 @@
 
             if (type === 'hp') {
                 percentage = max === 0 ? 0 : Math.min(100, (current / max) * 100);
-                progressColorStart = '#ef4444'; 
-                progressColorEnd = '#dc2626'; 
+                progressColorStart = '#FF5555'; // HP는 대비를 위해 밝은 빨간색 유지
+                progressColorEnd = '#DD3333'; // HP는 대비를 위해 어두운 빨간색 유지
                 combinedText = `${current}`; 
             } else if (type === 'xp') {
                 const char = characters.find(c => c.level === auxiliaryValue);
                 percentage = char ? char.xpProgress : 0;
-                progressColorStart = '#4ade80'; 
-                progressColorEnd = '#16a34a'; 
+                progressColorStart = '#BDF200'; // 포인트 연두색
+                progressColorEnd = '#99CC00'; // 어두운 연두색
                 combinedText = auxiliaryValue.toString(); 
             } else if (type === 'rank') { 
                 const rank = current; 
@@ -803,7 +816,7 @@
             
             return `
                 <div class="circular-progress-container w-16 h-16 sm:w-20 sm:h-20" style="${conicStyle}">
-                    <div class="circular-progress-inner" style="background-color: #1f2937;">
+                    <div class="circular-progress-inner" style="background-color: #1A1A1A;">
                         <span class="text-2xl font-extrabold" style="color: ${progressColorEnd};">${combinedText}</span>
                     </div>
                 </div>
@@ -827,7 +840,7 @@
         }
 
         function renderStats(stats, bonuses) {
-            const accentColorClass = 'text-red-500'; 
+            const accentColorClass = 'text-main-purple'; // 메인 보라색으로 변경
 
             return Object.entries(stats).map(([key, totalValue]) => {
                 const bonus = bonuses[key] || 0;
@@ -851,9 +864,10 @@
         }
 
         function renderResistance(acquired) {
+            // 보라색/회색 계열로 변경
             return ALL_RESISTANCES.map(res => {
                 const isAcquired = acquired?.includes(res) || false;
-                const colorClass = isAcquired ? 'text-red-400 font-semibold bg-red-900/40' : 'text-gray-400 opacity-90 bg-gray-700';
+                const colorClass = isAcquired ? 'text-main-purple font-semibold bg-[#332266]' : 'text-gray-400 opacity-90 bg-gray-700';
                 return `<span class="inline-block px-2 py-0.5 mr-2 mt-1 rounded-full text-xs ${colorClass}">${res}</span>`;
             }).join('');
         }
@@ -869,12 +883,12 @@
         
         function renderItemsDetail(items, gold, goldAccumulated) {
             let goldHtml = `
-                <div class="px-3 py-2 mb-3 bg-amber-900/30 rounded-lg shadow-inner border border-amber-800">
-                    <div class="flex justify-between items-center text-sm font-bold pb-1 mb-1 border-b border-amber-700/50">
-                        <span class="flex items-center text-amber-400">
+                <div class="px-3 py-2 mb-3 bg-card-bg rounded-lg shadow-inner border border-main-purple-dark">
+                    <div class="flex justify-between items-center text-sm font-bold pb-1 mb-1 border-b border-main-purple-dark">
+                        <span class="flex items-center text-point-lime">
                             <span class="mr-2 text-xl">💰</span> 소지 골드
                         </span>
-                        <span class="text-amber-400 text-xl">${formatGold(gold || 0)} G</span>
+                        <span class="text-point-lime text-xl">${formatGold(gold || 0)} G</span>
                     </div>
                     
                     <div class="flex justify-between items-center text-xs pt-1">
@@ -901,12 +915,12 @@
                     `;
 
                     const itemEffect = item.effect 
-                        ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-amber-900/40 text-amber-300 rounded-full">${item.effect}</span>` 
+                        ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-point-lime/40 text-black rounded-full">${item.effect}</span>` 
                         : '';
                     
                     let itemIconHtml = item.iconUrl 
                         ? `<img src="${item.iconUrl}" alt="${item.name} icon" class="w-4 h-4 mr-1 flex-shrink-0 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/16x16/9CA3AF/FFFFFF?text=X'" />`
-                        : `<span class="w-4 mr-1 text-amber-400 text-base">✨</span>`;
+                        : `<span class="w-4 mr-1 text-point-lime text-base">✨</span>`;
     
                     return `
                         <div class="flex justify-between items-center text-xs border-b border-gray-700 py-1.5 last:border-b-0">
@@ -945,7 +959,7 @@
                 const gradeClass = gradeInfo.gradeClass;
                 
                 const equippedTag = isEquipped
-                    ? `<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 ml-2 bg-red-700 text-white rounded-full leading-none">장착됨</span>`
+                    ? `<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 ml-2 bg-main-purple text-white rounded-full leading-none">장착됨</span>`
                     : '';
 
                 const gradeTag = `
@@ -956,10 +970,10 @@
                 `;
 
                 const titleEffect = title.effect 
-                    ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-indigo-900/40 text-indigo-300 rounded-full">${title.effect}</span>` 
+                    ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-main-purple/40 text-main-purple rounded-full">${title.effect}</span>` 
                     : '';
                 
-                let titleIconHtml = `<span class="w-4 mr-1 text-base text-red-500">${title.icon || '🏅'}</span>`;
+                let titleIconHtml = `<span class="w-4 mr-1 text-base text-main-purple">${title.icon || '🏅'}</span>`;
 
                 return `
                     <div class="flex justify-between items-center text-xs border-b border-gray-700 py-1.5 last:border-b-0">
@@ -975,8 +989,306 @@
             }).join('');
         }
 
+        function renderDetailView(charId) {
+            const appContainer = document.getElementById('app-view-container');
+            const char = characters.find(c => String(c.id) === charId);
 
-        // --- 10. 초기화 실행 ---
+            if (!char) {
+                appContainer.innerHTML = `<p class="text-center p-8 text-white">캐릭터 ID ${charId}를 찾을 수 없습니다. <button onclick="navigateToRanking()" class="text-main-purple underline">랭킹으로 돌아가기</button></p>`;
+                return;
+            }
+
+            const statBonuses = calculateStatBonuses(char.items);
+            const totalStats = char.stats || {};
+            
+            const equippedTitle = ALL_TITLES[char.title] || ALL_TITLES["칭호 없음"];
+            const titleText = equippedTitle.name;
+            const titleGradeClass = RARITY_STYLES[equippedTitle.grade].gradeClass; 
+            
+            const adminButton = isAdmin ? `
+                <button onclick="navigateToAdminEdit('${char.id}')" class="bg-main-purple hover:opacity-80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm mt-4 w-full">
+                    캐릭터 수정 (Admin)
+                </button>` : '';
+
+            const detailHtml = `
+                <div class="detail-container p-5 md:p-6 flex flex-col space-y-4">
+                    
+                    <div class="flex justify-start items-start border-b border-gray-700 pb-2 mb-1">
+                        <button onclick="navigateToRanking()" class="text-gray-400 hover:text-main-purple transition duration-150 flex items-center text-xs font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1">
+                                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.02 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.04.02z" clip-rule="evenodd" />
+                            </svg>
+                            랭킹 목록으로
+                        </button>
+                    </div>
+
+                    <!-- 1. 기본 정보 헤더 -->
+                    <div class="text-center">
+                        <p class="text-base font-extrabold mb-1 ${titleGradeClass}">${titleText}</p> 
+                        <h2 class="text-3xl font-extrabold text-white">${char.name || '이름 없음'}</h2>
+                        <p class="text-xs text-gray-400 mt-1">
+                            <span class="font-bold text-main-purple">${char.affiliation || '미상'}</span> 
+                            | 헌터 포인트: <span class="text-point-lime">${char.totalXp.toLocaleString()}</span>
+                        </p>
+                    </div>
+
+                    <!-- 2. 핵심 스탯 게이지 -->
+                    <div class="flex justify-around items-center p-3 bg-gray-900 rounded-lg shadow-inner border border-gray-800">
+                        
+                        <!-- 헌터 랭크 Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-main-purple font-semibold mb-1">헌터 랭크</p>
+                            ${renderCircularProgress(char.rank, 1, 'rank')} 
+                        </div>
+                        
+                        <!-- 레벨(EXP) Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-point-lime font-semibold mb-1">레벨</p>
+                            ${renderCircularProgress(char.xpCurrent || 0, char.xpNext || 1, 'xp', char.level || 1)}
+                        </div>
+                        
+                        <!-- HP Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-red-500 font-semibold mb-1">체력</p>
+                            ${renderCircularProgress(char.hpCurrent || 0, char.hpMax || 1, 'hp')}
+                        </div>
+                    </div>
+                    
+                    <!-- 3. 상세 스탯 -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
+                            <p class="text-base font-bold text-main-purple border-b border-gray-700 pb-1 mb-2">기본 스탯 (아이템 보너스)</p>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                ${renderStats(totalStats, statBonuses)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. 속성 저항 및 상태이상 -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
+                            <p class="text-base font-bold text-main-purple border-b border-gray-700 pb-1 mb-2">속성 저항</p>
+                            <div class="flex overflow-x-auto whitespace-nowrap text-sm min-h-[30px] py-1">
+                                ${renderResistance(char.resistance)}
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
+                            <p class="text-base font-bold text-main-purple border-b border-gray-700 pb-1 mb-2">상태이상</p>
+                            <div class="min-h-[30px] py-1">
+                                ${renderStatus(char.status)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. 소지품/아이템 목록 -->
+                    <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
+                        <p class="text-base font-bold text-main-purple border-b border-gray-700 pb-1 mb-2">소지 아이템 목록</p>
+                        <div class="space-y-1">
+                            ${renderItemsDetail(char.items, char.gold, char.goldAccumulated)}
+                        </div>
+                    </div>
+
+                    <!-- 6. 보유 칭호 목록 -->
+                    <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
+                        <p class="text-base font-bold text-main-purple border-b border-gray-700 pb-1 mb-2">보유 칭호 목록</p>
+                        <div class="space-y-1">
+                            ${renderTitlesDetail(char.titles, char.title)}
+                        </div>
+                    </div>
+                    
+                    ${adminButton}
+
+                </div>
+            `;
+            
+            appContainer.innerHTML = detailHtml;
+        }
+        
+        // 디테일 뷰에서 어드민 페이지로 이동하는 헬퍼 함수
+        window.navigateToAdminEdit = function(charId) {
+            window.location.hash = `#admin?edit=${charId}`;
+        }
+        
+        // --- 11. 관리자 뷰 렌더링 및 데이터 관리 기능 ---
+        
+        function renderAdminView() {
+            const appContainer = document.getElementById('app-view-container');
+            const urlParams = new URLSearchParams(window.location.hash.substring(7)); // #admin?edit=charId
+            const editCharId = urlParams.get('edit');
+            const editingChar = editCharId ? characters.find(c => String(c.id) === editCharId) : null;
+            
+            const headerText = editingChar ? `${editingChar.name} 수정` : '새로운 캐릭터 등록';
+            const buttonText = editingChar ? '캐릭터 데이터 업데이트' : '캐릭터 등록';
+
+            const affiliationOptions = ALLOWED_AFFILIATIONS.map(aff => `<option value="${aff}" ${editingChar && editingChar.affiliation === aff ? 'selected' : ''}>${aff}</option>`).join('');
+            
+            const titleOptions = ALL_TITLE_ARRAY.map(t => `<option value="${t.name}" ${editingChar && editingChar.title === t.name ? 'selected' : ''}>${t.name} (${t.grade})</option>`).join('');
+
+            const resistanceCheckboxes = ALL_RESISTANCES.map(res => {
+                const checked = editingChar && editingChar.resistance && editingChar.resistance.includes(res);
+                return `
+                    <label class="flex items-center space-x-2 text-sm text-gray-300">
+                        <input type="checkbox" name="resistance" value="${res}" ${checked ? 'checked' : ''} class="rounded text-main-purple bg-gray-700 border-gray-600 focus:ring-main-purple">
+                        <span>${res}</span>
+                    </label>
+                `;
+            }).join('');
+            
+            const statInputs = STAT_NAMES.map(stat => `
+                <div class="flex flex-col">
+                    <label for="stat-${stat}" class="text-xs font-semibold text-gray-400 mb-1">${stat}</label>
+                    <input type="number" id="stat-${stat}" name="stat-${stat}" value="${editingChar?.stats?.[stat] || 10}" min="1" max="100" class="p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                </div>
+            `).join('');
+
+            const adminHtml = `
+                <div class="admin-form p-5 md:p-6 space-y-4">
+                    <h2 class="text-2xl font-bold text-main-purple border-b border-gray-700 pb-3 mb-4">${headerText}</h2>
+                    
+                    <form id="character-form" onsubmit="event.preventDefault(); saveCharacterData('${editCharId || ''}')" class="space-y-5">
+                        <input type="hidden" id="char-id" value="${editingChar?.id || ''}">
+
+                        <!-- 기본 정보 -->
+                        <div class="space-y-3 p-4 bg-gray-900 rounded-lg">
+                            <p class="text-sm font-bold text-gray-300 border-b border-gray-600 pb-1 mb-2">기본 정보</p>
+                            
+                            <div>
+                                <label for="char-name" class="block text-sm font-semibold text-gray-400 mb-1">캐릭터 이름</label>
+                                <input type="text" id="char-name" value="${editingChar?.name || ''}" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                            </div>
+
+                            <div>
+                                <label for="char-affiliation" class="block text-sm font-semibold text-gray-400 mb-1">소속</label>
+                                <select id="char-affiliation" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                                    ${affiliationOptions}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="char-title" class="block text-sm font-semibold text-gray-400 mb-1">장착 칭호</label>
+                                <select id="char-title" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                                    ${titleOptions}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 헌터 포인트 및 골드 -->
+                        <div class="space-y-3 p-4 bg-gray-900 rounded-lg grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="char-xp" class="block text-sm font-semibold text-gray-400 mb-1">헌터 포인트 (XP)</label>
+                                <input type="number" id="char-xp" value="${editingChar?.totalXp || 1}" min="1" max="${MAX_TOTAL_XP}" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                            </div>
+                            <div>
+                                <label for="char-gold" class="block text-sm font-semibold text-gray-400 mb-1">소지 골드 (G)</label>
+                                <input type="number" id="char-gold" value="${editingChar?.gold || 0}" min="0" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                            </div>
+                            <div class="col-span-2">
+                                <label for="char-gold-acc" class="block text-sm font-semibold text-gray-400 mb-1">누적 골드 (Accumulated G)</label>
+                                <input type="number" id="char-gold-acc" value="${editingChar?.goldAccumulated || 0}" min="0" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                            </div>
+                        </div>
+
+                        <!-- 스탯 -->
+                        <div class="space-y-3 p-4 bg-gray-900 rounded-lg">
+                            <p class="text-sm font-bold text-gray-300 border-b border-gray-600 pb-1 mb-2">기본 능력치 (Stat)</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                ${statInputs}
+                            </div>
+                        </div>
+                        
+                        <!-- 저항 -->
+                        <div class="space-y-3 p-4 bg-gray-900 rounded-lg">
+                            <p class="text-sm font-bold text-gray-300 border-b border-gray-600 pb-1 mb-2">속성 저항 (Resistance)</p>
+                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                                ${resistanceCheckboxes}
+                            </div>
+                        </div>
+                        
+                        <!-- 아이콘 (선택 사항) -->
+                        <div class="space-y-3 p-4 bg-gray-900 rounded-lg">
+                            <label for="char-icon" class="block text-sm font-semibold text-gray-400 mb-1">아이콘 (Emoji/Text)</label>
+                            <input type="text" id="char-icon" value="${editingChar?.icon || '👤'}" maxlength="2" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-point-lime focus:ring-point-lime">
+                        </div>
+
+                        <!-- 저장 버튼 -->
+                        <button type="submit" class="w-full py-3 bg-main-purple hover:opacity-80 text-white font-extrabold rounded-lg transition duration-200 shadow-lg">
+                            ${buttonText}
+                        </button>
+                    </form>
+                </div>
+            `;
+            
+            appContainer.innerHTML = adminHtml;
+        }
+
+        window.saveCharacterData = async function(charId) {
+            const form = document.getElementById('character-form');
+            if (!form.checkValidity()) {
+                showMessage("모든 필드를 올바르게 입력해주세요.", 'error');
+                return;
+            }
+
+            const isNew = !charId;
+            const finalId = charId || crypto.randomUUID(); 
+            
+            const stats = {};
+            STAT_NAMES.forEach(stat => {
+                stats[stat] = parseInt(document.getElementById(`stat-${stat}`).value, 10);
+            });
+            
+            const selectedResistances = Array.from(document.querySelectorAll('input[name="resistance"]:checked'))
+                                            .map(el => el.value);
+            
+            const totalXp = parseInt(document.getElementById('char-xp').value, 10);
+            const gold = parseInt(document.getElementById('char-gold').value, 10);
+            const goldAccumulated = parseInt(document.getElementById('char-gold-acc').value, 10);
+            const charName = document.getElementById('char-name').value;
+            const equippedTitleName = document.getElementById('char-title').value;
+
+            // 칭호 데이터는 ALL_TITLES 맵에서 가져와야 함.
+            const equippedTitle = ALL_TITLES[equippedTitleName] || ALL_TITLES["칭호 없음"];
+            
+            // 보유 칭호 목록은 단순화하여, 장착된 칭호만 넣어둡니다. (추후 확장을 위해 배열로 유지)
+            // 실제 구현에서는 획득한 모든 칭호 목록이 필요합니다.
+            const titlesList = [equippedTitle];
+
+
+            const newCharData = {
+                id: finalId,
+                name: charName,
+                affiliation: document.getElementById('char-affiliation').value,
+                title: equippedTitleName,
+                titles: titlesList, // 실제 칭호 데이터 객체 배열
+                totalXp: totalXp,
+                gold: gold,
+                goldAccumulated: goldAccumulated,
+                stats: stats,
+                resistance: selectedResistances,
+                icon: document.getElementById('char-icon').value,
+                hpCurrent: 50, // 임시값
+                hpMax: 50,     // 임시값
+                status: [],    // 임시값
+                // 랭킹 점수 계산 (XP * 10 + Gold)
+                rankingScore: totalXp * 10 + gold,
+            };
+
+            const charDocRef = doc(db, getCollectionPath(userId), finalId);
+
+            try {
+                await setDoc(charDocRef, newCharData, { merge: !isNew }); 
+                
+                showMessage(`${newCharData.name} 캐릭터 데이터가 성공적으로 ${isNew ? '등록' : '업데이트'}되었습니다.`, 'success');
+                
+                // 등록/수정 후 랭킹 페이지로 이동
+                setTimeout(() => navigateToRanking(), 1500); 
+
+            } catch (e) {
+                console.error("데이터 저장 오류:", e);
+                showMessage(`캐릭터 저장 중 오류 발생: ${e.message}`, 'error');
+            }
+        }
+        
+        // --- 12. 초기화 실행 ---
         document.addEventListener('DOMContentLoaded', () => {
             initAndAuthenticate();
             if (!window.location.hash) {
