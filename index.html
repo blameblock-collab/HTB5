@@ -149,9 +149,36 @@
     <main id="main-content-area" class="p-4 md:p-6 flex justify-center">
 
         <div class="w-full max-w-xl">
+            
+            <!-- 관리자 모드 버튼 (새 캐릭터 추가) -->
+            <div id="admin-panel" class="mb-6 flex justify-end hidden">
+                <button id="add-char-btn" class="bg-point-lime hover:bg-point-lime-dark text-gray-900 font-bold py-2 px-4 rounded-lg transition duration-200 shadow-lg text-sm">
+                    + 새 캐릭터 추가 (관리자)
+                </button>
+            </div>
+
+            <!-- 필터 컨트롤 및 현재 필터 정보 -->
+            <div class="bg-card-bg p-4 rounded-xl shadow-lg mb-6 border border-gray-800">
+                <p id="current-filter-info" class="text-sm font-semibold mb-3 text-gray-400">현재 필터: 전체 보기</p>
+                <div id="filter-controls" class="flex flex-wrap gap-2 text-white">
+                    <!-- 필터 버튼이 여기에 렌더링됩니다. -->
+                </div>
+            </div>
+
             <!-- SPA 뷰 컨테이너 -->
             <div id="app-view-container">
-                <!-- 랭킹 목록 또는 상세 정보, 관리자 폼이 여기에 로드됩니다. -->
+                <!-- 랭킹 뷰 -->
+                <div id="ranking-view">
+                    <h1 class="text-3xl font-bold text-white mb-6">헌터 랭킹</h1>
+                    <div id="ranking-list" class="space-y-4">
+                        <!-- 랭킹 항목이 여기에 로드됩니다. -->
+                    </div>
+                </div>
+
+                <!-- 상세 뷰 -->
+                <div id="detail-view" class="hidden">
+                    <!-- 캐릭터 상세 정보가 여기에 로드됩니다. -->
+                </div>
             </div>
             
             <!-- 로딩 인디케이터 (다크 테마에 맞게 조정) -->
@@ -168,20 +195,11 @@
         </div>
     </main>
     
-    <!-- 🌟 관리자 로그인 모달 (Admin Login Modal) 🌟 -->
-    <div id="admin-login-modal" class="fixed inset-0 bg-black bg-opacity-80 z-[100] hidden flex items-center justify-center p-4" onclick="if(event.target.id === 'admin-login-modal') hideAdminLoginModal()">
-        <div class="bg-card-bg p-6 rounded-xl shadow-2xl border border-main-purple max-w-sm w-full transition-all duration-300 transform scale-95" onclick="event.stopPropagation()">
-            <h3 class="text-xl font-bold text-main-purple mb-4">관리자 로그인</h3>
-            <p class="text-sm text-gray-400 mb-4">관리자 페이지에 접근하려면 비밀번호를 입력하세요.</p>
-            <input type="password" id="admin-password-input" placeholder="관리자 비밀번호" class="w-full p-3 mb-4 rounded-lg bg-gray-900 text-white border border-gray-700 focus:border-point-lime focus:ring-point-lime" onkeydown="if(event.key === 'Enter') processAdminLogin()">
-            <div id="admin-error-message" class="text-red-400 text-sm mb-4 hidden"></div>
-            <div class="flex justify-end space-x-3">
-                <button onclick="hideAdminLoginModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">취소</button>
-                <button onclick="processAdminLogin()" class="bg-main-purple hover:opacity-80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">로그인</button>
-            </div>
-        </div>
+    <!-- 모달 컨테이너 (관리자 로그인, 캐릭터 추가/수정, 메시지) -->
+    <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-80 z-[100] hidden flex items-center justify-center p-4">
     </div>
-    <!-- 🌟 캐릭터 저장 성공/실패 메시지 🌟 -->
+    
+    <!-- 🌟 캐릭터 저장 성공/실패 메시지 (사용 안 함, modal-container로 통합) 🌟 -->
     <div id="message-box" class="fixed bottom-4 right-4 p-3 rounded-lg shadow-xl text-white transform translate-x-full transition-transform duration-500 z-[99]">
     </div>
 
@@ -243,6 +261,7 @@
          * @returns {string}
          */
         const formatNumber = (num) => {
+            if (num === undefined || num === null) return '0';
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         };
 
@@ -255,10 +274,10 @@
             const modalContainer = document.getElementById('modal-container');
             modalContainer.classList.remove('hidden');
             modalContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100">
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">${title}</h3>
-                    <p class="text-gray-600 mb-4">${message}</p>
-                    <button id="close-modal-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition duration-200">
+                <div class="bg-card-bg p-6 rounded-xl shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100 border border-main-purple">
+                    <h3 class="text-xl font-bold mb-3 ${title.includes('오류') || title.includes('실패') ? 'text-red-400' : 'text-main-purple'}">${title}</h3>
+                    <p class="text-gray-300 mb-4">${message}</p>
+                    <button id="close-modal-btn" class="w-full bg-main-purple hover:bg-main-purple-dark text-white font-bold py-2 rounded-lg transition duration-200">
                         확인
                     </button>
                 </div>
@@ -285,7 +304,8 @@
          */
         const getRarityClass = (rarity) => {
             const style = RARITY_STYLES[rarity];
-            return style ? (style.class || style.color) : 'text-gray-500'; 
+            // rarityStyles에는 class 또는 color 속성이 있을 수 있습니다.
+            return style ? (style.gradeClass || style.color) : 'text-gray-500'; 
         };
 
         /**
@@ -313,9 +333,7 @@
                 // firebaseConfig가 비어있는지 확인하여 초기화 전 오류 방지
                 if (Object.keys(firebaseConfig).length === 0) {
                      console.error("Firebase Config is empty. Cannot initialize.");
-                     document.getElementById('auth-status').textContent = `인증 오류: 설정 정보 없음`;
-                     document.getElementById('auth-status').classList.add('text-red-600');
-                     showMessageModal("오류", "Firebase 설정 정보를 불러올 수 없습니다.");
+                     document.getElementById('user-id-display').textContent = `인증 오류: 설정 정보 없음`;
                      return;
                 }
                 
@@ -333,8 +351,7 @@
                 }
                 
                 // 인증 상태 업데이트
-                document.getElementById('auth-status').textContent = `사용자 ID: ${userId.substring(0, 8)}... (인증됨)`;
-                document.getElementById('auth-status').classList.add('text-green-600');
+                document.getElementById('user-id-display').textContent = `사용자 ID: ${userId}`; // 전체 ID 표시
                 
                 // Firestore 리스너 시작
                 startFirestoreListener();
@@ -343,8 +360,7 @@
                 console.error("Firebase 초기화 또는 인증 오류:", error);
                 // 오류 메시지를 좀 더 명확하게 표시
                 const errorMessage = error.code ? `${error.code}` : `알 수 없는 오류`;
-                document.getElementById('auth-status').textContent = `인증 오류: ${errorMessage}`;
-                document.getElementById('auth-status').classList.add('text-red-600');
+                document.getElementById('user-id-display').textContent = `인증 오류: ${errorMessage}`;
                 showMessageModal("오류", `Firebase 연결 또는 인증에 문제가 발생했습니다: ${errorMessage}. 콘솔을 확인해주세요.`);
             }
         };
@@ -365,7 +381,19 @@
                     fetchedCharacters.push({
                         id: doc.id,
                         totalStats,
-                        rank: determineRank(totalStats),
+                        rank: determineRank(totalStats), // 랭크는 총 능력치로 자동 결정
+                        // 사용자 정의 데이터 필드 추가:
+                        level: data.level || 1, 
+                        exp: data.exp || 0,
+                        maxHp: data.maxHp || 100,
+                        currentHp: data.currentHp || 100,
+                        title: data.title || '초보 헌터',
+                        gold: {
+                            cumulative: data.gold?.cumulative || 0,
+                            used: data.gold?.used || 0,
+                            current: (data.gold?.cumulative || 0) - (data.gold?.used || 0),
+                        },
+                        items: data.items || [], // [{ name: "태양의 검", effect: { stat: "근력", value: 5 } }] 구조
                         ...data
                     });
                 });
@@ -388,6 +416,26 @@
          * 전체 애플리케이션 뷰를 렌더링합니다.
          */
         const renderApp = () => {
+            // 관리자 패널 표시/숨기기
+            const adminPanel = document.getElementById('admin-panel');
+            if (isAdmin) {
+                adminPanel.classList.remove('hidden');
+            } else {
+                adminPanel.classList.add('hidden');
+            }
+            
+            // 메인 타이틀 업데이트
+            const headerLoginBtn = document.querySelector('header button');
+            if (isAdmin) {
+                headerLoginBtn.textContent = '관리자 모드';
+                headerLoginBtn.classList.add('bg-point-lime', 'text-gray-900');
+                headerLoginBtn.classList.remove('bg-main-purple', 'text-white');
+            } else {
+                 headerLoginBtn.textContent = '로그인';
+                 headerLoginBtn.classList.add('bg-main-purple', 'text-white');
+                 headerLoginBtn.classList.remove('bg-point-lime', 'text-gray-900');
+            }
+            
             renderFilterControls();
             
             switch (currentView) {
@@ -398,14 +446,6 @@
                     renderDetailView(selectedCharId);
                     break;
             }
-            
-            // 관리자 패널 표시/숨기기
-            const adminPanel = document.getElementById('admin-panel');
-            if (isAdmin) {
-                adminPanel.classList.remove('hidden');
-            } else {
-                adminPanel.classList.add('hidden');
-            }
         };
 
         /**
@@ -413,30 +453,32 @@
          */
         const renderFilterControls = () => {
             const controls = document.getElementById('filter-controls');
+            // ... (필터 컨트롤 렌더링 로직은 그대로 유지) ...
+            
             let html = '';
 
             // 전체 보기 버튼
-            html += `<button onclick="setFilter('all', null)" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'all' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">전체 보기</button>`;
+            html += `<button onclick="setFilter('all', null)" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'all' ? 'bg-main-purple text-white shadow-md' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}">전체 보기</button>`;
 
             // 랭크 필터
-            html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg">`;
+            html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-900 rounded-lg">`;
             FILTERABLE_RANKS.forEach(rank => {
-                html += `<button onclick="setFilter('rank', '${rank}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'rank' && currentFilterValue === rank ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200'}">랭크 ${rank}</button>`;
+                html += `<button onclick="setFilter('rank', '${rank}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'rank' && currentFilterValue === rank ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}">랭크 ${rank}</button>`;
             });
             html += `</div>`;
 
             // 소속 필터
-            html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg">`;
+            html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-900 rounded-lg">`;
             FILTERABLE_AFFILIATIONS.forEach(affiliation => {
-                html += `<button onclick="setFilter('affiliation', '${affiliation}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'affiliation' && currentFilterValue === affiliation ? 'bg-teal-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200'}">${affiliation}</button>`;
+                html += `<button onclick="setFilter('affiliation', '${affiliation}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'affiliation' && currentFilterValue === affiliation ? 'bg-teal-600 text-white shadow-md' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}">${affiliation}</button>`;
             });
             html += `</div>`;
             
             // 희귀도 필터
-             html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg">`;
+             html += `<div class="flex flex-wrap gap-2 p-2 bg-gray-900 rounded-lg">`;
             Object.keys(RARITY_STYLES).forEach(rarity => {
                 const style = RARITY_STYLES[rarity];
-                html += `<button onclick="setFilter('rarity', '${rarity}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'rarity' && currentFilterValue === rarity ? 'bg-pink-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200'}">${rarity}</button>`;
+                html += `<button onclick="setFilter('rarity', '${rarity}')" class="px-3 py-1 text-sm font-medium rounded-full transition duration-150 ${currentFilterType === 'rarity' && currentFilterValue === rarity ? 'bg-pink-600 text-white shadow-md' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}">${rarity}</button>`;
             });
             html += `</div>`;
 
@@ -454,9 +496,15 @@
          * 랭킹 뷰를 렌더링합니다.
          */
         const renderRankingView = () => {
-            document.getElementById('ranking-view').classList.remove('hidden');
-            document.getElementById('detail-view').classList.add('hidden');
-            
+            const container = document.getElementById('app-view-container');
+            container.innerHTML = `
+                <div id="ranking-view">
+                    <h1 class="text-3xl font-bold text-white mb-6">헌터 랭킹</h1>
+                    <div id="ranking-list" class="space-y-4">
+                        <!-- 랭킹 항목이 여기에 로드됩니다. -->
+                    </div>
+                </div>
+            `;
             const rankingList = document.getElementById('ranking-list');
             
             // 필터링 적용
@@ -469,34 +517,43 @@
             });
 
             if (filteredChars.length === 0) {
-                rankingList.innerHTML = `<p class="text-center text-gray-500 py-10">현재 필터 조건에 맞는 헌터가 없습니다.</p>`;
+                rankingList.innerHTML = `<p class="text-center text-gray-500 py-10 bg-card-bg rounded-xl shadow-inner border border-gray-800">현재 필터 조건에 맞는 헌터가 없습니다.</p>`;
                 return;
             }
 
             let html = filteredChars.map((char, index) => {
                 // 등수 계산 (필터링된 목록에서의 순위)
                 const overallRank = characters.findIndex(c => c.id === char.id) + 1;
+                
+                // HP 비율 계산
+                const hpRatio = char.maxHp > 0 ? (char.currentHp / char.maxHp) * 100 : 0;
 
                 return `
-                    <div onclick="showDetail('${char.id}')" class="flex items-center p-4 bg-gray-50 hover:bg-blue-50 transition duration-150 rounded-xl shadow-sm border border-gray-200 cursor-pointer">
+                    <div onclick="showDetail('${char.id}')" class="ranking-tile flex items-center p-4 transition duration-150 rounded-xl shadow-lg border-2 border-gray-800">
                         <!-- 등수 -->
-                        <div class="w-12 text-center text-xl font-extrabold ${overallRank <= 3 ? 'text-red-600' : 'text-gray-600'}">
+                        <div class="w-12 text-center text-xl font-extrabold ${overallRank <= 3 ? 'text-point-lime' : 'text-gray-400'}">
                             ${overallRank}
                         </div>
                         <!-- 정보 -->
                         <div class="flex-grow ml-4">
                             <div class="flex items-center justify-between">
-                                <span class="text-lg font-bold ${getRarityClass(char.rarity)}">${char.name}</span>
-                                <span class="text-2xl font-black text-white px-3 py-1 rounded-lg ${char.rank === 'S' ? 'bg-red-600 shadow-lg' : char.rank === 'A' ? 'bg-yellow-600' : 'bg-gray-500'}">
+                                <span class="text-lg font-bold ${getRarityClass(char.rarity)}">${char.name} <span class="text-sm font-normal text-gray-500">(${char.title})</span></span>
+                                <span class="text-2xl font-black text-white px-3 py-1 rounded-lg ${char.rank === 'S' ? 'rank-S' : char.rank === 'A' ? 'rank-A' : char.rank === 'B' ? 'rank-B' : 'rank-C'} shadow-lg">
                                     ${char.rank}
                                 </span>
                             </div>
-                            <p class="text-sm text-gray-600 mt-1">
-                                <span class="font-semibold">${char.affiliation}</span> | 
-                                희귀도: <span class="font-bold ${getRarityClass(char.rarity)}">${char.rarity}</span> | 
+                            <p class="text-sm text-gray-400 mt-1">
+                                <span class="font-semibold text-main-purple">${char.affiliation}</span> | 
+                                LV. ${char.level} | 
                                 총 능력치: ${formatNumber(char.totalStats)}
                             </p>
-                            ${renderResistanceTags(char.resistances)}
+                            <!-- HP 바 추가 -->
+                            <div class="mt-2 text-xs text-gray-400">
+                                HP: <span class="font-bold">${formatNumber(char.currentHp)}/${formatNumber(char.maxHp)}</span>
+                                <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+                                    <div class="bg-red-500 h-2 rounded-full transition-all duration-300" style="width: ${hpRatio}%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -514,14 +571,14 @@
             if (!resistances || resistances.length === 0) return '';
             
             const tags = resistances.map(res => {
-                let colorClass = 'bg-gray-200 text-gray-700';
-                if (res === '태양') colorClass = 'bg-yellow-100 text-yellow-800';
-                else if (res === '파도') colorClass = 'bg-blue-100 text-blue-800';
-                else if (res === '폭풍') colorClass = 'bg-green-100 text-green-800';
-                else if (res === '대지') colorClass = 'bg-amber-100 text-amber-800';
-                else if (res === '밤') colorClass = 'bg-indigo-100 text-indigo-800';
+                let colorClass = 'bg-gray-700 text-gray-300';
+                if (res === '태양') colorClass = 'bg-yellow-600 text-yellow-50';
+                else if (res === '파도') colorClass = 'bg-blue-600 text-blue-50';
+                else if (res === '폭풍') colorClass = 'bg-green-600 text-green-50';
+                else if (res === '대지') colorClass = 'bg-amber-600 text-amber-50';
+                else if (res === '밤') colorClass = 'bg-indigo-600 text-indigo-50';
 
-                return `<span class="resistance-tag ${colorClass}">${res}</span>`;
+                return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${colorClass} mr-1">${res}</span>`;
             }).join('');
             
             return `<div class="mt-2 flex flex-wrap">${tags}</div>`;
@@ -539,9 +596,7 @@
                 return;
             }
 
-            document.getElementById('ranking-view').classList.add('hidden');
-            document.getElementById('detail-view').classList.remove('hidden');
-            const detailView = document.getElementById('detail-view');
+            const container = document.getElementById('app-view-container');
             
             const overallRank = characters.findIndex(c => c.id === char.id) + 1;
             
@@ -550,85 +605,132 @@
                 const maxStat = 1200; // 임의의 최대값 설정 (5000 / 5)
                 const percentage = Math.min(100, (value / maxStat) * 100);
 
+                // 능력치 바 스타일링 업데이트 (Dark Theme)
+                const barColor = index % 5 === 0 ? 'bg-red-500' : 
+                                 index % 5 === 1 ? 'bg-blue-500' : 
+                                 index % 5 === 2 ? 'bg-green-500' : 
+                                 index % 5 === 3 ? 'bg-yellow-500' : 'bg-purple-500';
+
                 return `
                     <div class="mb-3">
-                        <div class="flex justify-between items-center text-sm font-medium text-gray-700">
+                        <div class="flex justify-between items-center text-sm font-medium text-gray-300">
                             <span>${stat}</span>
                             <span>${formatNumber(value)}</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full stat-bar">
-                            <div class="stat-bar stat-color-${index}" style="width: ${percentage}%"></div>
+                        <div class="w-full bg-gray-700 rounded-full stat-bar h-2">
+                            <div class="h-2 rounded-full transition-all duration-500 ${barColor}" style="width: ${percentage}%"></div>
                         </div>
                     </div>
                 `;
             }).join('');
             
-            let resistanceHtml = char.resistances.map(res => {
-                let colorClass = 'bg-gray-700';
-                if (res === '태양') colorClass = 'bg-yellow-600';
-                else if (res === '파도') colorClass = 'bg-blue-600';
-                else if (res === '폭풍') colorClass = 'bg-green-600';
-                else if (res === '대지') colorClass = 'bg-amber-600';
-                else if (res === '밤') colorClass = 'bg-indigo-600';
+            let resistanceHtml = renderResistanceTags(char.resistances);
+            
+            // HP, EXP 비율
+            const hpRatio = char.maxHp > 0 ? (char.currentHp / char.maxHp) * 100 : 0;
+            const expRatio = char.level * 1000 > 0 ? (char.exp / (char.level * 1000)) * 100 : 0; // 레벨업 경험치 임의 계산
 
-                return `<span class="px-3 py-1 rounded-full text-white font-semibold text-xs ${colorClass}">${res}</span>`;
-            }).join('');
+            container.innerHTML = `
+                <div id="detail-view">
+                    <button onclick="setView('ranking')" class="text-main-purple hover:text-point-lime flex items-center mb-4 transition duration-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        랭킹 목록으로 돌아가기
+                    </button>
 
-
-            detailView.innerHTML = `
-                <button onclick="setView('ranking')" class="text-blue-500 hover:text-blue-700 flex items-center mb-4">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    랭킹 목록으로 돌아가기
-                </button>
-
-                <div class="bg-white border p-6 rounded-xl shadow-lg">
-                    <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <span class="text-sm font-semibold text-gray-500">No. ${overallRank}</span>
-                            <h2 class="text-4xl font-extrabold ${getRarityClass(char.rarity)}">${char.name}</h2>
-                            <p class="text-xl font-semibold text-gray-700 mt-1">${char.affiliation}</p>
+                    <div class="bg-card-bg border border-gray-800 p-6 rounded-xl shadow-2xl">
+                        <div class="flex items-start justify-between mb-4 pb-4 border-b border-gray-700">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-500">No. ${overallRank}</span>
+                                <h2 class="text-4xl font-extrabold ${getRarityClass(char.rarity)}">${char.name}</h2>
+                                <p class="text-xl font-semibold text-gray-400 mt-1">${char.affiliation}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xl font-semibold text-gray-500">랭크</span>
+                                <span class="block text-5xl font-black text-white px-4 py-1 rounded-xl ${char.rank === 'S' ? 'rank-S' : char.rank === 'A' ? 'rank-A' : char.rank === 'B' ? 'rank-B' : 'rank-C'} shadow-2xl">
+                                    ${char.rank}
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-xl font-semibold text-gray-500">랭크</span>
-                            <span class="block text-5xl font-black text-white px-4 py-1 rounded-xl ${char.rank === 'S' ? 'bg-red-600 shadow-2xl' : char.rank === 'A' ? 'bg-yellow-600' : 'bg-gray-500'}">
-                                ${char.rank}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        <!-- 기본 정보 및 저항 -->
-                        <div class="p-4 border rounded-lg bg-gray-50">
-                            <h3 class="text-lg font-bold text-gray-800 mb-3">능력 요약</h3>
-                            <p><strong>총 능력치:</strong> <span class="text-xl font-bold text-blue-600">${formatNumber(char.totalStats)}</span></p>
-                            <p class="mt-2"><strong>희귀도:</strong> <span class="font-bold ${getRarityClass(char.rarity)}">${char.rarity}</span></p>
-                            <div class="mt-4">
-                                <p class="font-semibold mb-2">저항 타입:</p>
-                                <div class="flex flex-wrap gap-2">${resistanceHtml}</div>
+                        
+                        <!-- 추가된 기본 정보 (레벨, HP, EXP, 골드, 칭호) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- 레벨 및 칭호 -->
+                            <div class="p-4 border rounded-lg bg-gray-900 border-gray-700">
+                                <h3 class="text-lg font-bold text-point-lime mb-2">기본 정보</h3>
+                                <p class="text-gray-300"><strong>칭호:</strong> <span class="font-bold text-yellow-400">${char.title}</span></p>
+                                <p class="text-gray-300"><strong>레벨:</strong> <span class="font-bold text-main-purple">LV. ${char.level}</span></p>
+                            </div>
+                            
+                            <!-- 골드 정보 -->
+                            <div class="p-4 border rounded-lg bg-gray-900 border-gray-700">
+                                <h3 class="text-lg font-bold text-point-lime mb-2">자산 현황</h3>
+                                <p class="text-gray-300"><strong>현재 골드:</strong> <span class="font-bold text-yellow-400">${formatNumber(char.gold.current)} G</span></p>
+                                <p class="text-gray-500 text-sm">누적: ${formatNumber(char.gold.cumulative)} G / 사용: ${formatNumber(char.gold.used)} G</p>
                             </div>
                         </div>
 
-                        <!-- 능력치 상세 바 -->
-                        <div class="p-4 border rounded-lg bg-gray-50">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">능력치 상세</h3>
-                            ${statHtml}
+                        <!-- HP 및 EXP 바 -->
+                        <div class="mb-6 p-4 border rounded-xl bg-gray-900 border-gray-700">
+                            <h3 class="text-lg font-bold text-white mb-3">체력 / 경험치</h3>
+                            <!-- HP 바 -->
+                            <div class="mb-3">
+                                <div class="flex justify-between items-center text-sm font-medium text-gray-300">
+                                    <span>체력 (HP)</span>
+                                    <span>${formatNumber(char.currentHp)} / ${formatNumber(char.maxHp)}</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-3">
+                                    <div class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: ${hpRatio}%"></div>
+                                </div>
+                            </div>
+                            <!-- EXP 바 -->
+                            <div>
+                                <div class="flex justify-between items-center text-sm font-medium text-gray-300">
+                                    <span>경험치 (EXP)</span>
+                                    <span>${formatNumber(char.exp)}</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-3">
+                                    <div class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: ${expRatio}%"></div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- 능력치 상세 및 저항 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <!-- 능력치 상세 바 -->
+                            <div class="p-4 border rounded-lg bg-gray-900 border-gray-700">
+                                <h3 class="text-lg font-bold text-white mb-4">능력치 상세 (총합: ${formatNumber(char.totalStats)})</h3>
+                                ${statHtml}
+                            </div>
+                            
+                            <!-- 저항 및 희귀도 -->
+                            <div class="p-4 border rounded-lg bg-gray-900 border-gray-700">
+                                <h3 class="text-lg font-bold text-white mb-3">희귀도 및 저항</h3>
+                                <p class="mb-4"><strong>희귀도:</strong> <span class="text-xl font-bold ${getRarityClass(char.rarity)}">${char.rarity}</span></p>
+                                <p class="font-semibold mb-2 text-gray-300">저항 타입:</p>
+                                <div class="flex flex-wrap gap-2">${resistanceHtml}</div>
+                                
+                                <p class="font-semibold mb-2 mt-4 text-gray-300">소지품:</p>
+                                <div class="text-sm text-gray-400">
+                                    ${char.items.length > 0 ? char.items.map(item => `<div class="mb-1">${item.name} <span class="text-point-lime">(+${item.effect.value} ${item.effect.stat})</span></div>`).join('') : '소지품 없음'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 투표 버튼 -->
+                        <div class="mt-6 flex flex-col sm:flex-row gap-4 items-center pt-6 border-t border-gray-700">
+                            <button onclick="handleVote('${char.id}', 'up')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center shadow-md">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                추천 (${formatNumber(char.votes?.up || 0)})
+                            </button>
+                            <button onclick="handleVote('${char.id}', 'down')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center shadow-md">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                비추천 (${formatNumber(char.votes?.down || 0)})
+                            </button>
+                        </div>
+
+                        ${isAdmin ? `<div class="mt-6"><button onclick="showEditCharModal('${char.id}')" class="w-full bg-main-purple hover:bg-main-purple-dark text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-lg">캐릭터 수정 (관리자)</button></div>` : ''}
+
                     </div>
-
-                    <!-- 투표 버튼 -->
-                    <div class="mt-6 flex flex-col sm:flex-row gap-4 items-center">
-                        <button onclick="handleVote('${char.id}', 'up')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                            추천 (${formatNumber(char.votes?.up || 0)})
-                        </button>
-                        <button onclick="handleVote('${char.id}', 'down')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            비추천 (${formatNumber(char.votes?.down || 0)})
-                        </button>
-                    </div>
-
-                    ${isAdmin ? `<div class="mt-6"><button onclick="showEditCharModal('${char.id}')" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">캐릭터 수정 (관리자)</button></div>` : ''}
-
                 </div>
             `;
         };
@@ -646,9 +748,7 @@
 
             const charRef = doc(db, 'artifacts', appId, 'public', 'data', 'characters', charId);
             const userVoteRef = doc(db, 'artifacts', appId, 'users', userId, 'votes', charId);
-            const voteField = `votes.${type}`;
             const otherType = type === 'up' ? 'down' : 'up';
-            const otherVoteField = `votes.${otherType}`;
 
             try {
                 await runTransaction(db, async (transaction) => {
@@ -750,19 +850,19 @@
         /**
          * 관리자 비밀번호 입력 모달을 표시합니다.
          */
-        const showAdminLoginModal = () => {
+        window.showAdminLoginModal = () => { // window scope로 변경
              const modalContainer = document.getElementById('modal-container');
             modalContainer.classList.remove('hidden');
             modalContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100">
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">관리자 모드 활성화</h3>
-                    <p class="text-gray-600 mb-4">비밀번호를 입력하세요. (힌트: ${MOCK_ADMIN_PASSWORD})</p>
-                    <input type="password" id="admin-password-input" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500" placeholder="관리자 비밀번호">
+                <div class="bg-card-bg p-6 rounded-lg shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100 border border-main-purple">
+                    <h3 class="text-xl font-bold mb-3 text-main-purple">관리자 모드 활성화</h3>
+                    <p class="text-gray-400 mb-4">비밀번호를 입력하세요. (힌트: ${MOCK_ADMIN_PASSWORD})</p>
+                    <input type="password" id="admin-password-input" class="w-full p-3 border border-gray-700 rounded-lg mb-4 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" placeholder="관리자 비밀번호">
                     <div class="flex gap-2">
-                        <button id="admin-login-btn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition duration-200">
+                        <button id="admin-login-btn" class="flex-1 bg-main-purple hover:bg-main-purple-dark text-white font-bold py-2 rounded-lg transition duration-200">
                             로그인
                         </button>
-                        <button id="close-admin-modal-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 rounded-lg transition duration-200">
+                        <button id="close-admin-modal-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition duration-200">
                             취소
                         </button>
                     </div>
@@ -793,7 +893,7 @@
          * 캐릭터 추가/수정 모달을 표시합니다.
          * @param {string | null} charId - 수정 시 캐릭터 ID, 추가 시 null
          */
-        const showEditCharModal = (charId = null) => {
+        window.showEditCharModal = (charId = null) => { // window scope로 변경
             if (!isAdmin) {
                 showMessageModal("권한 없음", "관리자만 캐릭터를 추가/수정할 수 있습니다.");
                 return;
@@ -806,61 +906,137 @@
             modalContainer.classList.remove('hidden');
 
             let statInputs = STAT_NAMES.map((stat) => `
-                <label class="block mb-2 text-sm font-medium text-gray-700">${stat}</label>
-                <input type="number" id="stat-${stat}" value="${char.stats?.[stat] || ''}" min="0" class="w-full p-2 border border-gray-300 rounded-lg mb-3 focus:ring-blue-500 focus:border-blue-500" required>
+                <label class="block mb-1 text-sm font-medium text-gray-300">${stat}</label>
+                <input type="number" id="stat-${stat}" value="${char.stats?.[stat] || ''}" min="0" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
             `).join('');
 
             let resistanceCheckboxes = ALL_RESISTANCES.map(res => `
                 <label class="inline-flex items-center mr-4">
-                    <input type="checkbox" id="res-${res}" value="${res}" ${char.resistances?.includes(res) ? 'checked' : ''} class="form-checkbox text-blue-600 rounded">
-                    <span class="ml-2 text-sm text-gray-700">${res}</span>
+                    <input type="checkbox" id="res-${res}" value="${res}" ${char.resistances?.includes(res) ? 'checked' : ''} class="form-checkbox text-main-purple rounded bg-gray-700 border-gray-600">
+                    <span class="ml-2 text-sm text-gray-300">${res}</span>
                 </label>
             `).join('');
 
             let rarityOptions = Object.keys(RARITY_STYLES).map(rarity => `
-                <option value="${rarity}" ${char.rarity === rarity ? 'selected' : ''} class="${getRarityClass(rarity)}">${rarity}</option>
+                <option value="${rarity}" ${char.rarity === rarity ? 'selected' : ''} class="text-gray-900">${rarity}</option>
             `).join('');
             
             let affiliationOptions = ALLOWED_AFFILIATIONS.map(affil => `
-                <option value="${affil}" ${char.affiliation === affil ? 'selected' : ''}>${affil}</option>
+                <option value="${affil}" ${char.affiliation === affil ? 'selected' : ''} class="text-gray-900">${affil}</option>
             `).join('');
+            
+            // ----------------------------------------------------
+            // 🌟 사용자 요청에 따른 새로운 입력 필드 추가 🌟
+            // ----------------------------------------------------
+            
+            // 소지품/효과는 복잡한 구조이므로, 텍스트 형태로만 입력받고 코드가 JSON 구조로 변환하도록 임시 처리
+            const defaultItem = char.items?.[0] || { name: "", effect: { stat: "", value: 0 }};
 
 
             modalContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full transform transition-all duration-300 scale-100">
-                    <h3 class="text-2xl font-bold mb-4 text-gray-800">${isEditing ? '캐릭터 수정' : '새 캐릭터 추가'}</h3>
+                <div class="bg-card-bg p-6 rounded-xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-100 border border-main-purple overflow-y-auto max-h-[90vh]">
+                    <h3 class="text-2xl font-bold mb-4 text-white">${isEditing ? '캐릭터 수정' : '새 캐릭터 추가'}</h3>
                     <form id="char-form">
-                        <label class="block mb-2 text-sm font-medium text-gray-700">이름</label>
-                        <input type="text" id="char-name" value="${char.name || ''}" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500" required>
                         
-                        <label class="block mb-2 text-sm font-medium text-gray-700">소속</label>
-                        <select id="char-affiliation" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500" required>
+                        <!-- 1. 기본 정보 (이름, 소속, 희귀도) -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">기본 정보</h4>
+                        <label class="block mb-1 text-sm font-medium text-gray-300">이름 (텍스트)</label>
+                        <input type="text" id="char-name" value="${char.name || ''}" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                        
+                        <label class="block mb-1 text-sm font-medium text-gray-300">소속 (텍스트)</label>
+                        <select id="char-affiliation" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
                             ${affiliationOptions}
                         </select>
                         
-                        <label class="block mb-2 text-sm font-medium text-gray-700">희귀도</label>
-                        <select id="char-rarity" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500" required>
+                        <label class="block mb-1 text-sm font-medium text-gray-300">희귀도 (텍스트)</label>
+                        <select id="char-rarity" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
                             ${rarityOptions}
                         </select>
-                        
-                        <h4 class="text-lg font-semibold mb-2 mt-4 text-gray-700">능력치 (Stats)</h4>
-                        <div class="grid grid-cols-2 gap-x-4">
+
+                        <label class="block mb-1 text-sm font-medium text-gray-300">칭호 (텍스트)</label>
+                        <input type="text" id="char-title" value="${char.title || ''}" placeholder="예: 초보 헌터" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white">
+
+                        <!-- 2. 레벨/경험치/체력 -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">레벨 및 생존력</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">레벨 (숫자)</label>
+                                <input type="number" id="char-level" value="${char.level || 1}" min="1" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">경험치/헌터 포인트 (숫자)</label>
+                                <input type="number" id="char-exp" value="${char.exp || 0}" min="0" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">최대 체력 (숫자)</label>
+                                <input type="number" id="char-maxHp" value="${char.maxHp || 100}" min="1" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">현재 체력 (숫자)</label>
+                                <input type="number" id="char-currentHp" value="${char.currentHp || 100}" min="0" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                        </div>
+
+                        <!-- 3. 능력치 상세 -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">능력치 (5개 항목)</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4">
                             ${statInputs}
                         </div>
                         
-                        <h4 class="text-lg font-semibold mb-2 mt-4 text-gray-700">저항 (Resistances)</h4>
-                        <div class="flex flex-wrap gap-2 mb-6 p-2 border rounded-lg">
-                            ${resistanceCheckboxes}
+                        <!-- 4. 골드 정보 -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">골드 (3개 항목)</h4>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">누적 골드 (숫자)</label>
+                                <input type="number" id="gold-cumulative" value="${char.gold?.cumulative || 0}" min="0" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-300">사용 골드 (숫자)</label>
+                                <input type="number" id="gold-used" value="${char.gold?.used || 0}" min="0" class="w-full p-2 border border-gray-700 rounded-lg mb-3 focus:ring-point-lime focus:border-point-lime bg-gray-900 text-white" required>
+                            </div>
+                             <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-500">현재 골드 (자동 계산)</label>
+                                <input type="text" value="${formatNumber((char.gold?.cumulative || 0) - (char.gold?.used || 0))}" disabled class="w-full p-2 border border-gray-700 rounded-lg mb-3 bg-gray-800 text-gray-400 cursor-not-allowed">
+                            </div>
                         </div>
 
-                        <div class="flex gap-3">
-                            <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition duration-200">
+                        <!-- 5. 저항 -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">저항 (Resistances)</h4>
+                        <div class="flex flex-wrap gap-2 mb-6 p-2 border border-gray-700 rounded-lg bg-gray-900">
+                            ${resistanceCheckboxes}
+                        </div>
+                        
+                        <!-- 6. 소지품 (임시 처리) -->
+                        <h4 class="text-lg font-semibold mb-2 mt-4 text-point-lime border-b border-gray-700 pb-1">소지품 (임시: 1개만 입력)</h4>
+                        <p class="text-xs text-gray-500 mb-2">복잡한 구조이므로, 현재는 하나의 소지품과 그 효과만 간단히 입력합니다.</p>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="col-span-1">
+                                <label class="block mb-1 text-sm font-medium text-gray-300">소지품 이름</label>
+                                <input type="text" id="item-name" value="${defaultItem.name}" placeholder="예: 태양의 검" class="w-full p-2 border border-gray-700 rounded-lg bg-gray-900 text-white">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block mb-1 text-sm font-medium text-gray-300">효과 스탯</label>
+                                <select id="item-effect-stat" class="w-full p-2 border border-gray-700 rounded-lg bg-gray-900 text-white">
+                                    <option value="">선택</option>
+                                    ${STAT_NAMES.map(s => `<option value="${s}" ${defaultItem.effect.stat === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block mb-1 text-sm font-medium text-gray-300">효과 값 (숫자)</label>
+                                <input type="number" id="item-effect-value" value="${defaultItem.effect.value || 0}" min="0" class="w-full p-2 border border-gray-700 rounded-lg bg-gray-900 text-white">
+                            </div>
+                        </div>
+
+
+                        <!-- 버튼 -->
+                        <div class="flex gap-3 mt-8">
+                            <button type="submit" class="flex-1 bg-main-purple hover:bg-main-purple-dark text-white font-bold py-2 rounded-lg transition duration-200">
                                 ${isEditing ? '수정 완료' : '캐릭터 추가'}
                             </button>
-                            <button type="button" id="cancel-edit-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 rounded-lg transition duration-200">
+                            <button type="button" id="cancel-edit-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition duration-200">
                                 취소
                             </button>
-                            ${isEditing ? `<button type="button" id="delete-char-btn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition duration-200">삭제</button>` : ''}
+                            ${isEditing ? `<button type="button" id="delete-char-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition duration-200">삭제</button>` : ''}
                         </div>
                     </form>
                 </div>
@@ -890,14 +1066,14 @@
              const modalContainer = document.getElementById('modal-container');
             modalContainer.classList.remove('hidden');
             modalContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100">
-                    <h3 class="text-xl font-bold mb-3 text-red-600">확인 필요</h3>
-                    <p class="text-gray-600 mb-4">${message}</p>
+                <div class="bg-card-bg p-6 rounded-lg shadow-xl max-w-sm w-full transform transition-all duration-300 scale-100 border border-main-purple">
+                    <h3 class="text-xl font-bold mb-3 text-red-400">확인 필요</h3>
+                    <p class="text-gray-300 mb-4">${message}</p>
                     <div class="flex gap-2">
-                        <button id="confirm-yes-btn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition duration-200">
+                        <button id="confirm-yes-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition duration-200">
                             예, 삭제합니다
                         </button>
-                        <button id="confirm-no-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 rounded-lg transition duration-200">
+                        <button id="confirm-no-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition duration-200">
                             취소
                         </button>
                     </div>
@@ -922,19 +1098,71 @@
             const charName = document.getElementById('char-name').value;
             const charAffiliation = document.getElementById('char-affiliation').value;
             const charRarity = document.getElementById('char-rarity').value;
+            const charTitle = document.getElementById('char-title').value || '초보 헌터';
             
+            // 6. 능력치
             const stats = {};
             STAT_NAMES.forEach(stat => {
                 stats[stat] = parseInt(document.getElementById(`stat-${stat}`).value) || 0;
             });
 
+            // 7. 저항
             const resistances = ALL_RESISTANCES.filter(res => document.getElementById(`res-${res}`).checked);
             
+            // 4. 레벨, 경험치
+            const level = parseInt(document.getElementById('char-level').value) || 1;
+            const exp = parseInt(document.getElementById('char-exp').value) || 0;
+            
+            // 5. 체력
+            const maxHp = parseInt(document.getElementById('char-maxHp').value) || 100;
+            const currentHp = parseInt(document.getElementById('char-currentHp').value) || 100;
+
+            // 8. 골드
+            const goldCumulative = parseInt(document.getElementById('gold-cumulative').value) || 0;
+            const goldUsed = parseInt(document.getElementById('gold-used').value) || 0;
+
+            // 9. 소지품 (임시 처리: 1개만 저장)
+            const itemName = document.getElementById('item-name').value;
+            const itemEffectStat = document.getElementById('item-effect-stat').value;
+            const itemEffectValue = parseInt(document.getElementById('item-effect-value').value) || 0;
+            
+            let items = [];
+            if (itemName && itemEffectStat) {
+                items.push({
+                    name: itemName,
+                    effect: {
+                        stat: itemEffectStat,
+                        value: itemEffectValue
+                    }
+                });
+            }
+
+
             const newCharData = {
+                // 1. 이름 (텍스트)
                 name: charName,
+                // 2. 소속 (텍스트)
                 affiliation: charAffiliation,
+                // 3. 희귀도 (텍스트)
                 rarity: charRarity,
+                // 4. 레벨, 경험치 (숫자)
+                level: level,
+                exp: exp,
+                // 5. 체력 (숫자)
+                maxHp: maxHp,
+                currentHp: currentHp,
+                // 6. 스탯 (5개 항목 모두 숫자)
                 stats: stats,
+                // 7. 칭호 (텍스트)
+                title: charTitle,
+                // 8. 골드 (3개 항목 모두 숫자, 누적 및 사용만 저장, 현재 골드는 코드에서 계산)
+                gold: {
+                    cumulative: goldCumulative,
+                    used: goldUsed,
+                },
+                // 9. 소지품 (JSON Array 구조)
+                items: items,
+                // 저항은 기존 항목
                 resistances: resistances,
             };
 
@@ -952,7 +1180,7 @@
                     // 추가
                     // votes 필드를 초기화 (없으면 투표 시 오류 발생 가능)
                     newCharData.votes = { up: 0, down: 0 };
-                    await setDoc(doc(charCollectionRef), newCharData); // addDoc 대신 setDoc(docRef) 사용
+                    await setDoc(doc(charCollectionRef), newCharData); 
                     showMessageModal("성공", `${charName} 캐릭터가 성공적으로 추가되었습니다.`);
                 }
             } catch (error) {
@@ -987,16 +1215,17 @@
             // 초기 Firebase 및 인증 시작
             initializeFirebase();
             
-            // 관리자 로그인 버튼 이벤트 등록 (예시를 위해 임의의 요소에 연결)
-            document.getElementById('auth-status').classList.add('cursor-pointer', 'hover:text-blue-500');
-            document.getElementById('auth-status').title = "클릭하여 관리자 로그인 시도";
-            document.getElementById('auth-status').onclick = showAdminLoginModal;
+            // 사용자 ID 표시 영역을 관리자 로그인 버튼처럼 사용
+            document.getElementById('user-id-display').classList.add('cursor-pointer', 'hover:text-point-lime');
+            document.getElementById('user-id-display').title = "클릭하여 관리자 로그인 시도";
+            document.getElementById('user-id-display').onclick = showAdminLoginModal;
             
             // 새 캐릭터 추가 버튼 이벤트
             document.getElementById('add-char-btn').onclick = () => showEditCharModal(null);
+            
+            // 초기 뷰 설정
+            renderApp();
         });
     </script>
 </body>
 </html>
-
-
