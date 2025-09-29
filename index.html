@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUNTER THE BEGINNG 5 | 랭킹</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            /* --- Dark Theme Background --- */
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* GitHub Dark Base */
+            color: #e5e7eb; /* Light Gray Text */
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        /* 🌟🌟🌟 최종 해결책: Fixed Header 높이(h-16 = 4rem = 64px)만큼 본문을 강제적으로 밀어냅니다. 🌟🌟🌟 */
+        #main-content-area {
+            /* !important를 사용하여 다른 스타일과의 충돌을 완전히 방지합니다. */
+            padding-top: 4rem !important; 
+        }
+
+        /* 기타 스타일 (유지) */
+        .gacha-card, .detail-container {
+            border: 1px solid #374151; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
+            background-color: #1f2937; 
+            position: relative; 
+            border-radius: 1rem;
+        }
+        .text-\[10px\] { font-size: 10px; }
+        .circular-progress-container {
+            position: relative;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .circular-progress-inner {
+            position: absolute;
+            width: 80%; 
+            height: 80%;
+            background-color: #1f2937; 
+            border-radius: 50%;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #e5e7eb; 
+            text-shadow: none;
+        }
+        
+        /* 랭크별 스타일 정의 */
+        .rank-S { background-color: #8b5cf6; color: #f3e8ff; border-color: #c4b5fd; } 
+        .rank-A { background-color: #3b82f6; color: #eff6ff; border-color: #93c5fd; } 
+        .rank-B { background-color: #10b981; color: #ecfdf5; border-color: #6ee7b7; } 
+        .rank-C { background-color: #f97316; color: #fff7ed; border-color: #fdba74; } 
+        .rank-D { background-color: #b45309; color: #fff7ed; border-color: #d97706; } 
+        .rank-F { background-color: #4b5563; color: #f9fafb; border-color: #9ca3af; } 
+        
+        .ranking-tile {
+            cursor: pointer;
+            transition: background-color 0.1s, transform 0.1s;
+            background-color: #1f2937; 
+        }
+        .ranking-tile:hover {
+            background-color: #374151; 
+            transform: scale(1.01);
+        }
+
+        /* --- 등급별 텍스트 그라데이션 스타일 --- */
+        .grade-legendary-text {
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+            background-image: linear-gradient(to right, #fcd34d, #fbbf24, #f59e0b); /* Gold */
+            font-weight: bold;
+        }
+        .grade-unique-text {
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+            background-image: linear-gradient(to right, #e879f9, #d946ef, #c026d3); /* Pink/Purple */
+            font-weight: bold;
+        }
+        .grade-mystic-text {
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+            background-image: linear-gradient(to right, #38bdf8, #8b5cf6, #ec4899); /* Rainbow mix */
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#0d1117',
+                        'card-bg': '#1f2937',
+                        'accent': '#ef4444', 
+                        'gold': '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+
+    <!-- 고정된 상단 메뉴바 (Navbar) -->
+    <!-- h-16 (64px) 높이, fixed로 화면에 고정 -->
+    <header class="fixed top-0 left-0 w-full bg-gray-900 shadow-xl z-50 transition-all duration-300 h-16">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-full"> 
+                <!-- 메인 타이틀/로고 -->
+                <div class="flex-shrink-0">
+                    <a href="#ranking" onclick="navigateToRanking()" class="text-3xl font-extrabold tracking-wider text-red-600 hover:text-red-500 transition duration-300">
+                        HUNTER THE BEGINNG 5
+                    </a>
+                </div>
+
+                <!-- 메뉴 항목 -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#ranking" onclick="navigateToRanking()" class="text-gray-300 hover:bg-gray-800 hover:text-red-400 px-3 py-2 rounded-lg text-lg font-medium transition duration-200">
+                            RANKING
+                        </a>
+                        <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-red-400 px-3 py-2 rounded-lg text-lg font-medium transition duration-200">
+                            SHOP
+                        </a>
+                        <button class="bg-red-700 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg ml-4 transition duration-200 shadow-md hover:shadow-lg">
+                            로그인
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 🌟🌟🌟 #main-content-area ID 부여 및 pt-16 제거 (CSS에서 강제 지정) 🌟🌟🌟 -->
+    <main id="main-content-area" class="p-4 md:p-6 flex justify-center">
+
+        <!-- 메인 컨테이너: 최대 가로 xl (768px)로 확장 및 중앙 정렬 -->
+        <div class="w-full max-w-xl">
+            <!-- SPA 뷰 컨테이너 -->
+            <div id="app-view-container">
+                <!-- 랭킹 목록 또는 상세 정보가 여기에 로드됩니다. -->
+            </div>
+            
+            <!-- 로딩 인디케이터 (다크 테마에 맞게 조정) -->
+            <div id="loading-indicator" class="text-center p-8 bg-gray-800 text-gray-400 rounded-xl shadow-md hidden">
+                <div class="animate-spin inline-block w-6 h-6 border-4 border-red-500 border-t-transparent rounded-full mr-2"></div>
+                캐릭터 데이터를 데이터베이스에서 불러오는 중...
+            </div>
+            
+            <!-- 카피라이트 문구 (Dark Theme Adaptation) -->
+            <p class="mt-8 pt-4 text-xs text-center text-gray-600 border-t border-gray-700">
+                &copy; 2025 HUNTER THE BEGINNING 5
+            </p>
+
+        </div>
+    </main>
+
+    <!-- Firebase 및 메인 스크립트 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDocs, onSnapshot, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // 디버깅을 위해 Firestore 로그 레벨 설정
+        setLogLevel('Debug');
+
+        // --- 1. 전역 변수 및 상수 ---
+        let db;
+        let auth;
+        let userId;
+        let characters = []; 
+        
+        let currentView = 'ranking'; 
+        let selectedCharId = null; 
+        
+        let currentFilterType = 'all'; 
+        let currentFilterValue = null; 
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const ALL_RESISTANCES = ["태양", "파도", "폭풍", "대지", "밤"];
+        const STAT_NAMES = ["근력", "지능", "민첩", "행운", "이성"];
+        
+        const ALLOWED_AFFILIATIONS = ["헌터관리청", "백두 길드", "무소속"]; 
+        const FILTERABLE_AFFILIATIONS = ALLOWED_AFFILIATIONS; 
+        const FILTERABLE_RANKS = ['S', 'A', 'B', 'C', 'D', 'F']; 
+        
+        const RARITY_STYLES = {
+            '일반': { key: 'common', color: 'text-gray-400', gradeClass: 'text-gray-400' },
+            '레어': { key: 'rare', color: 'text-blue-400', gradeClass: 'text-blue-400' },
+            '유니크': { key: 'unique', color: 'text-purple-400', gradeClass: 'grade-unique-text' }, 
+            '레전더리': { key: 'legendary', color: 'text-yellow-400', gradeClass: 'grade-legendary-text' },
+            '미스틱': { key: 'mystic', class: 'grade-mystic-text', gradeClass: 'grade-mystic-text' } 
+        };
+        
+        // --- 2. 칭호 메타데이터 정의 (새로 추가) ---
+        const ALL_TITLES = {
+            "친구 살해자": { name: "친구 살해자", effect: "대인전 피해량 +15%", icon: "🔪", grade: "레어" },
+            "검은 비명": { name: "검은 비명", effect: "밤 속성 저항 획득", icon: "🌌", grade: "레전더리" },
+            "고요한 사냥꾼": { name: "고요한 사냥꾼", effect: "모든 스탯 +3, 이성 유지력 +10", icon: "🤫", grade: "미스틱" },
+            "고블린 슬레이어": { name: "고블린 슬레이어", effect: "대 고블린족 피해량 +50%", icon: "🔨", grade: "일반" },
+            "첫 번째 발자국": { name: "첫 번째 발자국", effect: "행운 +5", icon: "👣", grade: "유니크" },
+            "칭호 없음": { name: "칭호 없음", effect: "효과 없음", icon: "👤", grade: "일반" }
+        };
+
+
+        // --------------------------------------------------------
+        // --- 3. 랭크 및 레벨 시스템 데이터 정의 ---
+        // --------------------------------------------------------
+        
+        const LEVEL_RANK_DATA = [
+            { level: 1, minXp: 1, maxXp: 30, rank: 'F' }, { level: 2, minXp: 31, maxXp: 60, rank: 'F' }, 
+            { level: 3, minXp: 61, maxXp: 90, rank: 'F' }, { level: 4, minXp: 91, maxXp: 120, rank: 'F' }, 
+            { level: 5, minXp: 121, maxXp: 150, rank: 'F' },
+            { level: 6, minXp: 151, maxXp: 167, rank: 'D' }, { level: 7, minXp: 168, maxXp: 184, rank: 'D' }, 
+            { level: 8, minXp: 185, maxXp: 200, rank: 'D' }, { level: 9, minXp: 201, maxXp: 216, rank: 'D' }, 
+            { level: 10, minXp: 217, maxXp: 233, rank: 'D' }, { level: 11, minXp: 234, maxXp: 250, rank: 'D' }, 
+            { level: 12, minXp: 251, maxXp: 267, rank: 'D' }, { level: 13, minXp: 268, maxXp: 283, rank: 'D' }, 
+            { level: 14, minXp: 284, maxXp: 300, rank: 'D' }, { level: 15, minXp: 301, maxXp: 317, rank: 'D' }, 
+            { level: 16, minXp: 318, maxXp: 333, rank: 'D' }, { level: 17, minXp: 334, maxXp: 350, rank: 'D' }, 
+            { level: 18, minXp: 351, maxXp: 366, rank: 'D' }, { level: 19, minXp: 367, maxXp: 383, rank: 'D' }, 
+            { level: 20, minXp: 384, maxXp: 400, rank: 'D' },
+            { level: 21, minXp: 401, maxXp: 420, rank: 'C' }, { level: 22, minXp: 421, maxXp: 440, rank: 'C' }, 
+            { level: 23, minXp: 441, maxXp: 460, rank: 'C' }, { level: 24, minXp: 461, maxXp: 480, rank: 'C' }, 
+            { level: 25, minXp: 481, maxXp: 500, rank: 'C' }, { level: 26, minXp: 501, maxXp: 520, rank: 'C' }, 
+            { level: 27, minXp: 521, maxXp: 540, rank: 'C' }, { level: 28, minXp: 541, maxXp: 560, rank: 'C' }, 
+            { level: 29, minXp: 561, maxXp: 580, rank: 'C' }, 
+            { level: 30, minXp: 581, maxXp: 600, rank: 'B' }, 
+            { level: 31, minXp: 601, maxXp: 618, rank: 'B' }, { level: 32, minXp: 619, maxXp: 637, rank: 'B' }, 
+            { level: 33, minXp: 638, maxXp: 655, rank: 'B' }, { level: 34, minXp: 656, maxXp: 673, rank: 'B' }, 
+            { level: 35, minXp: 674, maxXp: 690, rank: 'B' }, { level: 36, minXp: 691, maxXp: 707, rank: 'B' }, 
+            { level: 37, minXp: 708, maxXp: 725, rank: 'B' }, { level: 38, minXp: 726, maxXp: 743, rank: 'B' }, 
+            { level: 39, minXp: 744, maxXp: 760, rank: 'B' }, { level: 40, minXp: 761, maxXp: 777, rank: 'B' }, 
+            { level: 41, minXp: 778, maxXp: 795, rank: 'B' }, { level: 42, minXp: 796, maxXp: 814, rank: 'B' }, 
+            { level: 43, minXp: 815, maxXp: 832, rank: 'B' }, { level: 44, minXp: 833, maxXp: 850, rank: 'B' },
+            { level: 45, minXp: 851, maxXp: 880, rank: 'A' }, { level: 46, minXp: 881, maxXp: 910, rank: 'A' }, 
+            { level: 47, minXp: 911, maxXp: 940, rank: 'A' }, { level: 48, minXp: 941, maxXp: 970, rank: 'A' }, 
+            { level: 49, minXp: 971, maxXp: 999, rank: 'A' }, 
+            { level: 50, minXp: 1000, maxXp: 1000, rank: 'S' }, 
+        ];
+        
+        const MAX_TOTAL_XP = 1000;
+
+
+        // --------------------------------------------------------
+        // --- 4. 초기 데이터 ---
+        // --------------------------------------------------------
+        const INITIAL_MOCK_DATA = [
+            { id: 1, affiliation: "백두 길드", title: "친구 살해자", name: "홍길동", totalXp: 350, hpCurrent: 35, hpMax: 50, gold: 5500, goldAccumulated: 25000, stats: { 근력: 20, 지능: 8, 민첩: 22, 행운: 8, 이성: 3 }, resistance: ["태양", "파도"], status: ["광란", "회귀중독"], 
+                items: [
+                    { name: "낡은 단검", effect: "근력+5", iconUrl: "https://placehold.co/16x16/f59e0b/FFFFFF?text=SW", grade: "레어" }, 
+                    { name: "신비한 포션", effect: "HP+20", grade: "일반" }, 
+                    { name: "빛나는 돌", effect: "행운+3", grade: "유니크" }
+                ], 
+                titles: [
+                    ALL_TITLES["친구 살해자"],
+                    ALL_TITLES["고블린 슬레이어"]
+                ],
+                icon: "⚔️", rankingScore: 0 
+            },
+            { id: 2, affiliation: "헌터관리청", title: "검은 비명", name: "김철수", totalXp: 500, hpCurrent: 50, hpMax: 50, gold: 12500, goldAccumulated: 45000, stats: { 근력: 40, 지능: 5, 민첩: 8, 행운: 2, 이성: 1 }, resistance: ["밤", "대지"], status: ["살해 충동"], 
+                items: [
+                    { name: "대지의 방패", effect: "체력+30", iconUrl: "https://placehold.co/16x16/10b981/FFFFFF?text=SH", grade: "레전더리" }, 
+                    { name: "어둠의 돌", "effect": "민첩-2", grade: "일반" }
+                ], 
+                titles: [
+                    ALL_TITLES["검은 비명"],
+                    ALL_TITLES["고블린 슬레이어"],
+                    ALL_TITLES["칭호 없음"]
+                ],
+                icon: "💀", rankingScore: 0 
+            },
+            { id: 3, affiliation: "무소속", title: "고요한 사냥꾼", name: "이지아", totalXp: 550, hpCurrent: 10, hpMax: 50, gold: 800, goldAccumulated: 15000, stats: { 근력: 3, 지능: 18, 민첩: 40, 행운: 20, 이성: 10 }, resistance: ["폭풍", "파도", "태양", "밤", "대지"], status: [], 
+                items: [
+                    { name: "바람의 활", effect: "민첩+10", grade: "레어" }, 
+                    { name: "깃털 망토", effect: "행운+5", grade: "미스틱" }
+                ], 
+                titles: [
+                    ALL_TITLES["고요한 사냥꾼"],
+                    ALL_TITLES["첫 번째 발자국"]
+                ],
+                icon: "🏹", rankingScore: 0 
+            },
+        ];
+
+        // --- 5. Firebase 초기화 및 인증 ---
+
+        async function initAndAuthenticate() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                userId = auth.currentUser.uid;
+                
+                await seedDatabase(userId);
+                listenForCharacters(userId);
+                
+                window.addEventListener('hashchange', router);
+                
+            } catch (error) {
+                console.error("Firebase 초기화 또는 인증 오류:", error);
+                document.getElementById('loading-indicator').textContent = "데이터 로딩 오류 발생. 콘솔을 확인해주세요.";
+                document.getElementById('loading-indicator').classList.remove('hidden');
+            }
+        }
+        
+        async function seedDatabase(uid) {
+            const charCollectionRef = collection(db, getCollectionPath(uid));
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const snapshot = await getDocs(charCollectionRef);
+                    if (snapshot.empty || snapshot.size !== INITIAL_MOCK_DATA.length) {
+                        for (const charData of INITIAL_MOCK_DATA) {
+                            const docRef = doc(charCollectionRef, String(charData.id)); 
+                            const rankingScore = (charData.totalXp || 0) * 10 + (charData.gold || 0);
+                            transaction.set(docRef, {...charData, rankingScore});
+                        }
+                    } else {
+                        for (const charData of INITIAL_MOCK_DATA) {
+                            const docRef = doc(charCollectionRef, String(charData.id));
+                            const rankingScore = (charData.totalXp || 0) * 10 + (charData.gold || 0);
+                            transaction.update(docRef, {
+                                totalXp: charData.totalXp,
+                                hpCurrent: charData.hpCurrent,
+                                hpMax: charData.hpMax,
+                                gold: charData.gold, 
+                                goldAccumulated: charData.goldAccumulated, 
+                                resistance: charData.resistance, 
+                                items: charData.items, 
+                                title: charData.title, 
+                                titles: charData.titles, 
+                                rankingScore: rankingScore
+                            });
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("데이터 시딩/업데이트 중 오류 발생:", e);
+            }
+        }
+
+        // --- 6. 헬퍼 함수 (Level, Rank, Navigation, Filter 등) ---
+
+        function getCollectionPath(uid) {
+            return `artifacts/${appId}/users/${uid}/characters`;
+        }
+        
+        function calculateLevelAndRank(totalXp) {
+            let result = {
+                level: 1, rank: 'F', xpCurrent: totalXp, xpNext: 30, xpProgress: 0
+            };
+            
+            if (totalXp >= MAX_TOTAL_XP) {
+                const L50_DATA = LEVEL_RANK_DATA.find(d => d.level === 50);
+                result.level = 50; result.rank = L50_DATA.rank; result.xpCurrent = MAX_TOTAL_XP;
+                result.xpNext = MAX_TOTAL_XP; result.xpProgress = 100;
+                return result;
+            }
+
+            const currentLevelData = LEVEL_RANK_DATA.find(data => 
+                totalXp >= data.minXp && totalXp <= data.maxXp
+            );
+
+            if (currentLevelData) {
+                const levelRange = currentLevelData.maxXp - currentLevelData.minXp + 1;
+                const currentXpInLevel = totalXp - currentLevelData.minXp + 1; 
+                
+                result.level = currentLevelData.level;
+                result.rank = currentLevelData.rank;
+                result.xpCurrent = currentXpInLevel;
+                result.xpNext = levelRange;
+                result.xpProgress = (currentXpInLevel / levelRange) * 100;
+            } else if (totalXp < 1) {
+                const L1_DATA = LEVEL_RANK_DATA.find(d => d.level === 1);
+                result.level = 1; result.rank = L1_DATA.rank; result.xpCurrent = 0; 
+                result.xpNext = L1_DATA.maxXp; result.xpProgress = 0;
+            }
+
+            return result;
+        }
+
+        function listenForCharacters(uid) {
+            const charCollectionRef = collection(db, getCollectionPath(uid));
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.classList.remove('hidden');
+
+            onSnapshot(charCollectionRef, (snapshot) => {
+                loadingIndicator.classList.add('hidden'); 
+
+                const newCharacters = [];
+                snapshot.forEach(doc => {
+                    let char = { id: doc.id, ...doc.data() };
+                    
+                    char.type = 'real'; 
+                    
+                    char.totalXp = char.totalXp || 1; 
+                    const { level, rank, xpCurrent, xpNext, xpProgress } = calculateLevelAndRank(char.totalXp);
+                    char.level = level;
+                    char.rank = rank;
+                    char.xpCurrent = xpCurrent;
+                    char.xpNext = xpNext;
+                    char.xpProgress = xpProgress;
+                    
+                    if (typeof char.rankingScore !== 'number') {
+                        char.rankingScore = (char.totalXp || 0) * 10 + (char.gold || 0); 
+                    }
+                    newCharacters.push(char);
+                });
+                
+                characters = newCharacters; 
+                router();
+
+            }, (error) => {
+                console.error("Firestore 실시간 리스너 오류:", error);
+                loadingIndicator.textContent = "데이터 로딩 중 오류가 발생했습니다.";
+            });
+        }
+
+        function router() {
+            const hash = window.location.hash;
+            const appContainer = document.getElementById('app-view-container');
+            
+            if (!appContainer) return;
+            appContainer.innerHTML = ''; 
+
+            if (hash.startsWith('#detail=')) {
+                selectedCharId = hash.substring(8);
+                renderDetailView(selectedCharId);
+            } else {
+                currentView = 'ranking';
+                selectedCharId = null;
+                renderRankingView();
+            }
+        }
+
+        function navigateToDetail(charId) {
+            window.location.hash = `detail=${charId}`;
+        }
+        
+        function navigateToRanking() {
+            window.location.hash = '#ranking';
+        }
+
+        window.navigateToDetail = navigateToDetail;
+        window.navigateToRanking = navigateToRanking;
+        
+        function applyFilter(type, value) {
+            if (value === 'all' || value === '') {
+                currentFilterType = 'all';
+                currentFilterValue = null;
+            } else {
+                currentFilterType = type;
+                currentFilterValue = value;
+            }
+            renderRankingView(); 
+        }
+        window.applyFilter = applyFilter; 
+        
+        function handleFilterChange(selectElement) {
+            const filterType = selectElement.id.replace('filter-', ''); 
+            const filterValue = selectElement.value; 
+            
+            if (filterType === 'affiliation') {
+                document.getElementById('filter-rank').value = 'all';
+            } else if (filterType === 'rank') {
+                document.getElementById('filter-affiliation').value = 'all';
+            }
+
+            applyFilter(filterType, filterValue);
+        }
+        window.handleFilterChange = handleFilterChange;
+
+        // --- 7. 랭킹 뷰 렌더링 ---
+        
+        function renderRankChange(change) {
+            const absChange = Math.abs(change);
+            let text = '';
+            let colorClass = 'font-bold';
+            let tooltip = '';
+
+            if (change > 0) {
+                text = `↑ ${absChange}`;
+                colorClass = 'text-green-500'; 
+                tooltip = `${absChange}단계 상승`;
+            } else if (change < 0) {
+                text = `↓ ${absChange}`;
+                colorClass = 'text-red-500'; 
+                tooltip = `${absChange}단계 하락`;
+            } else {
+                text = '---';
+                colorClass = 'text-gray-700 select-none'; 
+                tooltip = '순위 변동 없음';
+            }
+
+            return `<div class="flex items-center ${colorClass} w-12 justify-center flex-shrink-0 text-sm" title="${tooltip}">
+                        ${text}
+                    </div>`;
+        }
+        
+        function renderFilterDropdowns() {
+            const affiliationOptions = FILTERABLE_AFFILIATIONS.map(aff => `
+                <option value="${aff}" ${currentFilterType === 'affiliation' && currentFilterValue === aff ? 'selected' : ''}>${aff}</option>
+            `).join('');
+
+            const rankOptions = FILTERABLE_RANKS.map(rank => `
+                <option value="${rank}" ${currentFilterType === 'rank' && currentFilterValue === rank ? 'selected' : ''}>${rank} 랭크</option>
+            `).join('');
+
+
+            return `
+                <div class="flex gap-3 mb-4 p-3 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
+                    
+                    <div class="flex-1 min-w-0">
+                        <label for="filter-affiliation" class="block text-xs font-semibold text-gray-300 mb-1">소속별 보기</label>
+                        <select id="filter-affiliation" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-accent focus:ring-accent p-2 border bg-gray-900 text-gray-200 shadow-sm">
+                            <option value="all" ${currentFilterType === 'all' || currentFilterType === 'rank' ? 'selected' : ''}>전체 소속</option>
+                            ${affiliationOptions}
+                        </select>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <label for="filter-rank" class="block text-xs font-semibold text-gray-300 mb-1">랭크별 보기</label>
+                        <select id="filter-rank" onchange="handleFilterChange(this)" class="w-full text-sm rounded-lg border-gray-600 focus:border-accent focus:ring-accent p-2 border bg-gray-900 text-gray-200 shadow-sm">
+                            <option value="all" ${currentFilterType === 'all' || currentFilterType === 'affiliation' ? 'selected' : ''}>전체 랭크</option>
+                            ${rankOptions}
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function renderRankingView() {
+            const appContainer = document.getElementById('app-view-container');
+            
+            let rankingList = [...characters]; 
+
+            if (currentFilterType === 'affiliation' && currentFilterValue) {
+                rankingList = rankingList.filter(char => char.affiliation === currentFilterValue);
+            } else if (currentFilterType === 'rank' && currentFilterValue) {
+                rankingList = rankingList.filter(char => char.rank === currentFilterValue);
+            }
+            
+            rankingList.sort((a, b) => (b.totalXp || 0) - (a.totalXp || 0));
+
+            const filterDropdownsHtml = renderFilterDropdowns();
+
+
+            const headerHtml = `
+                <div class="flex justify-between items-center mb-4 p-3 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold text-white">헌터 랭킹 목록</h2> 
+                </div>
+                ${filterDropdownsHtml}
+            `;
+            
+            const rankingHtml = rankingList.map((item, index) => {
+                const effectiveRank = item.rank; 
+                const rankClass = `rank-${effectiveRank}`;
+                const xpDisplay = item.totalXp.toLocaleString();
+                
+                const rankChange = Math.floor(Math.random() * 7) - 3; 
+                
+                const affiliationText = `<span class="text-gray-400 truncate">${item.affiliation || '미상'}</span>`; 
+                
+                
+                let rankTextColor = 'text-gray-400';
+                let rankClasses = 'text-xl font-bold';
+                if (index + 1 === 1) { 
+                    rankTextColor = 'text-yellow-400'; 
+                    rankClasses = 'text-3xl font-extrabold';
+                } else if (index + 1 === 2) { 
+                    rankTextColor = 'text-gray-300'; 
+                    rankClasses = 'text-3xl font-extrabold';
+                } else if (index + 1 === 3) { 
+                    rankTextColor = 'text-amber-500'; 
+                    rankClasses = 'text-3xl font-extrabold';
+                }
+                
+                const currentRank = index + 1;
+
+                return `
+                    <div 
+                        class="ranking-tile flex items-center p-3 mb-2 bg-gray-800 rounded-xl shadow-md border border-gray-700 font-semibold hover:bg-gray-700"
+                        data-char-id="${item.id}" onclick="navigateToDetail('${item.id}')"
+                    >
+                        <!-- 1. 순위 -->
+                        <div class="rank-number w-10 text-right mr-2 flex-shrink-0 ${rankTextColor} ${rankClasses}">
+                            &nbsp;${currentRank}
+                        </div>
+                        
+                        <!-- 2. 순위 변경 여부 -->
+                        ${renderRankChange(rankChange)}
+                        
+                        <!-- 3. 랭크 표시 (원형) -->
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full font-bold text-xl mr-3 flex-shrink-0 ${rankClass}" title="${effectiveRank} 랭크">
+                            ${effectiveRank}
+                        </div>
+                        
+                        <!-- 4. 이름 및 소속 (중앙 영역) -->
+                        <div class="flex-grow truncate min-w-[30%] mr-2">
+                            <p class="text-lg truncate text-white">${item.name}</p>
+                            <p class="text-xs text-gray-500 flex items-center">
+                                ${affiliationText}
+                            </p>
+                        </div>
+                        
+                        <!-- 5 & 6. 헌터 포인트 및 클릭 아이콘 그룹 -->
+                        <div class="flex items-center flex-shrink-0 w-[110px] text-right ml-1"> 
+                            
+                            <!-- 헌터 포인트 -->
+                            <div class="flex flex-col items-end flex-grow min-w-0">
+                                <span class="text-[10px] text-gray-500 uppercase leading-none whitespace-nowrap">헌터 포인트</span>
+                                <span class="text-lg font-extrabold text-white truncate">${xpDisplay}</span>
+                            </div>
+
+                            <!-- 클릭 아이콘 -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-red-500 ml-2 flex-shrink-0">
+                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.58 9.5l-4.35-4.21a.75.75 0 111.04-1.08l5 4.87a.75.75 0 010 1.08l-5 4.87a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            appContainer.innerHTML = headerHtml + `<div id="ranking-list" class="mt-4 space-y-3">${rankingList.length > 0 ? rankingHtml : '<p class="text-center p-8 text-gray-400 bg-gray-800 rounded-xl shadow-md">표시할 캐릭터가 없습니다.</p>'}</div>`;
+        }
+        
+
+        // --- 8. 상세 뷰 렌더링 (보유 칭호 탭 추가) ---
+
+        function renderDetailView(charId) {
+            const appContainer = document.getElementById('app-view-container');
+            const char = characters.find(c => String(c.id) === charId);
+
+            if (!char) {
+                appContainer.innerHTML = `<p class="text-center p-8 text-white">캐릭터 ID ${charId}를 찾을 수 없습니다. <button onclick="navigateToRanking()" class="text-red-500 underline">랭킹으로 돌아가기</button></p>`;
+                return;
+            }
+
+            const statBonuses = calculateStatBonuses(char.items);
+            const totalStats = char.stats || {};
+            
+            const equippedTitle = ALL_TITLES[char.title] || ALL_TITLES["칭호 없음"];
+            const titleText = equippedTitle.name;
+            const titleGradeClass = RARITY_STYLES[equippedTitle.grade].gradeClass; 
+
+
+            const detailHtml = `
+                <div class="detail-container p-5 md:p-6 flex flex-col space-y-4">
+                    
+                    <div class="flex justify-start items-start border-b border-gray-700 pb-2 mb-1">
+                        <button onclick="navigateToRanking()" class="text-gray-400 hover:text-red-500 transition duration-150 flex items-center text-xs font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1">
+                                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.02 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.04.02z" clip-rule="evenodd" />
+                            </svg>
+                            랭킹 목록으로
+                        </button>
+                    </div>
+
+                    <!-- 1. 기본 정보 헤더 -->
+                    <div class="text-center">
+                        <p class="text-base font-extrabold mb-1 ${titleGradeClass}">${titleText}</p> 
+                        <h2 class="text-3xl font-extrabold text-white">${char.name || '이름 없음'}</h2>
+                        <p class="text-xs text-gray-400 mt-1">
+                            <span class="font-bold text-red-500">${char.affiliation || '미상'}</span> 
+                            | 헌터 포인트: ${char.totalXp.toLocaleString()}
+                        </p>
+                    </div>
+
+                    <!-- 2. 핵심 스탯 게이지 -->
+                    <div class="flex justify-around items-center p-3 bg-gray-700 rounded-lg shadow-inner border border-gray-600">
+                        
+                        <!-- 헌터 랭크 Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-amber-400 font-semibold mb-1">헌터 랭크</p>
+                            ${renderCircularProgress(char.rank, 1, 'rank')} 
+                        </div>
+                        
+                        <!-- 레벨(EXP) Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-emerald-400 font-semibold mb-1">레벨</p>
+                            ${renderCircularProgress(char.xpCurrent || 0, char.xpNext || 1, 'xp', char.level || 1)}
+                        </div>
+                        
+                        <!-- HP Ring -->
+                        <div class="flex flex-col items-center">
+                            <p class="text-xs text-center text-red-500 font-semibold mb-1">체력</p>
+                            ${renderCircularProgress(char.hpCurrent || 0, char.hpMax || 1, 'hp')}
+                        </div>
+                    </div>
+                    
+                    <!-- 3. 상세 스탯 -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">기본 스탯 (아이템 보너스)</p>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                ${renderStats(totalStats, statBonuses)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. 속성 저항 및 상태이상 -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">속성 저항</p>
+                            <div class="flex overflow-x-auto whitespace-nowrap text-sm min-h-[30px] py-1">
+                                ${renderResistance(char.resistance)}
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                            <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">상태이상</p>
+                            <div class="min-h-[30px] py-1">
+                                ${renderStatus(char.status)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. 소지품/아이템 목록 -->
+                    <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                        <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">소지 아이템 목록</p>
+                        <div class="space-y-1">
+                            ${renderItemsDetail(char.items, char.gold, char.goldAccumulated)}
+                        </div>
+                    </div>
+
+                    <!-- 6. 보유 칭호 목록 -->
+                    <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                        <p class="text-base font-bold text-red-500 border-b border-gray-600 pb-1 mb-2">보유 칭호 목록</p>
+                        <div class="space-y-1">
+                            ${renderTitlesDetail(char.titles, char.title)}
+                        </div>
+                    </div>
+
+                </div>
+            `;
+            
+            appContainer.innerHTML = detailHtml;
+        }
+
+
+        // --- 9. 렌더링 도우미 함수 ---
+        
+        function renderCircularProgress(current, max, type, auxiliaryValue = null) {
+            let percentage = 0;
+            let progressColorStart, progressColorEnd, combinedText;
+
+            const trackColor = '#374151'; 
+            
+            const rankGradientColors = {
+                'S': { start: '#c084fc', end: '#a855f7' }, 
+                'A': { start: '#60a5fa', end: '#3b82f6' }, 
+                'B': { start: '#34d399', end: '#10b981' }, 
+                'C': { start: '#fcd34d', end: '#f97316' }, 
+                'D': { start: '#a16207', end: '#854d0e' }, 
+                'F': { start: '#9ca3af', end: '#6b7280' }  
+            };
+
+            if (type === 'hp') {
+                percentage = max === 0 ? 0 : Math.min(100, (current / max) * 100);
+                progressColorStart = '#ef4444'; 
+                progressColorEnd = '#dc2626'; 
+                combinedText = `${current}`; 
+            } else if (type === 'xp') {
+                const char = characters.find(c => c.level === auxiliaryValue);
+                percentage = char ? char.xpProgress : 0;
+                progressColorStart = '#4ade80'; 
+                progressColorEnd = '#16a34a'; 
+                combinedText = auxiliaryValue.toString(); 
+            } else if (type === 'rank') { 
+                const rank = current; 
+                const RANK_ORDER = ['F', 'D', 'C', 'B', 'A', 'S'];
+                const rankIndex = RANK_ORDER.indexOf(rank);
+                
+                percentage = rankIndex >= 0 ? (rankIndex + 1) / RANK_ORDER.length * 100 : 0; 
+                
+                const colors = rankGradientColors[rank] || rankGradientColors['F'];
+                progressColorStart = colors.start;
+                progressColorEnd = colors.end;
+                combinedText = rank; 
+            }
+            
+            const conicStyle = `background: conic-gradient(
+                ${progressColorStart} 0%, 
+                ${progressColorEnd} ${percentage}%, 
+                ${trackColor} ${percentage}%
+            )`;
+            
+            return `
+                <div class="circular-progress-container w-16 h-16 sm:w-20 sm:h-20" style="${conicStyle}">
+                    <div class="circular-progress-inner" style="background-color: #1f2937;">
+                        <span class="text-2xl font-extrabold" style="color: ${progressColorEnd};">${combinedText}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateStatBonuses(items) {
+            const bonuses = { "근력": 0, "지능": 0, "민첩": 0, "행운": 0, "이성": 0 };
+            items?.forEach(item => {
+                if (!item.effect) return;
+                const match = item.effect.match(/([근력지능민첩행운이성]+)([+-]\d+)/);
+                if (match) {
+                    const statName = match[1];
+                    const statChange = parseInt(match[2], 10);
+                    if (STAT_NAMES.includes(statName)) {
+                        bonuses[statName] += statChange;
+                    }
+                }
+            });
+            return bonuses;
+        }
+
+        function renderStats(stats, bonuses) {
+            const accentColorClass = 'text-red-500'; 
+
+            return Object.entries(stats).map(([key, totalValue]) => {
+                const bonus = bonuses[key] || 0;
+                let bonusText = (bonus === 0) ? '±0' : (bonus > 0 ? '+' : '') + bonus;
+                const bonusDisplay = `<span class="text-gray-400 text-xs leading-none">(${bonusText})</span>`; 
+
+                return `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="${accentColorClass} font-medium">${key}</span>
+                        <div class="flex items-baseline space-x-1">
+                            <span class="font-bold text-white">${(totalValue || 0) + bonus}</span>
+                            ${bonusDisplay}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function formatGold(gold) {
+            return gold.toLocaleString('ko-KR');
+        }
+
+        function renderResistance(acquired) {
+            return ALL_RESISTANCES.map(res => {
+                const isAcquired = acquired?.includes(res) || false;
+                const colorClass = isAcquired ? 'text-red-400 font-semibold bg-red-900/40' : 'text-gray-400 opacity-90 bg-gray-700';
+                return `<span class="inline-block px-2 py-0.5 mr-2 mt-1 rounded-full text-xs ${colorClass}">${res}</span>`;
+            }).join('');
+        }
+
+        function renderStatus(status) {
+            if (!status || status.length === 0) {
+                return `<p class="text-xs text-gray-400 pt-2 px-1">현재 적용된 상태 이상 없음</p>`; 
+            }
+            return status.map(s => `
+                <span class="inline-block px-2 py-0.5 mr-2 mt-1 text-xs bg-red-900/50 text-red-300 rounded-full font-bold shadow-inner">${s}</span>
+            `).join('');
+        }
+        
+        function renderItemsDetail(items, gold, goldAccumulated) {
+            let goldHtml = `
+                <div class="px-3 py-2 mb-3 bg-amber-900/30 rounded-lg shadow-inner border border-amber-800">
+                    <div class="flex justify-between items-center text-sm font-bold pb-1 mb-1 border-b border-amber-700/50">
+                        <span class="flex items-center text-amber-400">
+                            <span class="mr-2 text-xl">💰</span> 소지 골드
+                        </span>
+                        <span class="text-amber-400 text-xl">${formatGold(gold || 0)} G</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs pt-1">
+                        <span class="text-gray-400 font-semibold">누적 골드 (총 획득량)</span>
+                        <span class="text-white font-bold">${formatGold(goldAccumulated || 0)} G</span>
+                    </div>
+                </div>
+            `;
+            
+            let itemsHtml;
+            if (!items || items.length === 0) {
+                itemsHtml = `<p class="text-xs text-gray-400 pt-2 px-1">소지 아이템이 없습니다.</p>`;
+            } else {
+                itemsHtml = items.map(item => {
+                    const itemGrade = item.grade || '일반';
+                    const gradeInfo = RARITY_STYLES[itemGrade] || RARITY_STYLES['일반'];
+                    const gradeClass = gradeInfo.gradeClass;
+                    
+                    const gradeTag = `
+                        <span class="text-[10px] font-extrabold uppercase ml-1 mr-1.5 leading-none 
+                            ${gradeClass}" title="${itemGrade} 등급">
+                            ${itemGrade}
+                        </span>
+                    `;
+
+                    const itemEffect = item.effect 
+                        ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-amber-900/40 text-amber-300 rounded-full">${item.effect}</span>` 
+                        : '';
+                    
+                    let itemIconHtml = item.iconUrl 
+                        ? `<img src="${item.iconUrl}" alt="${item.name} icon" class="w-4 h-4 mr-1 flex-shrink-0 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/16x16/9CA3AF/FFFFFF?text=X'" />`
+                        : `<span class="w-4 mr-1 text-amber-400 text-base">✨</span>`;
+    
+                    return `
+                        <div class="flex justify-between items-center text-xs border-b border-gray-700 py-1.5 last:border-b-0">
+                            <div class="flex items-center truncate">
+                                ${itemIconHtml}
+                                ${gradeTag}
+                                <span class="truncate font-medium text-white">${item.name}</span>
+                            </div>
+                            ${itemEffect}
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            return goldHtml + itemsHtml;
+        }
+
+        function renderTitlesDetail(titles, equippedTitleName) {
+            if (!titles || titles.length === 0) {
+                return `<p class="text-xs text-gray-400 pt-2 px-1">획득한 칭호가 없습니다.</p>`;
+            } 
+            
+            const sortedTitles = [...titles].sort((a, b) => {
+                if (a.name === equippedTitleName) return -1;
+                if (b.name === equippedTitleName) return 1;
+                
+                const gradeOrder = ['미스틱', '레전더리', '유니크', '레어', '일반'];
+                return gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade);
+            });
+
+
+            return sortedTitles.map(title => {
+                const isEquipped = title.name === equippedTitleName;
+                const titleGrade = title.grade || '일반';
+                const gradeInfo = RARITY_STYLES[titleGrade] || RARITY_STYLES['일반'];
+                const gradeClass = gradeInfo.gradeClass;
+                
+                const equippedTag = isEquipped
+                    ? `<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 ml-2 bg-red-700 text-white rounded-full leading-none">장착됨</span>`
+                    : '';
+
+                const gradeTag = `
+                    <span class="text-[10px] font-extrabold uppercase ml-1 mr-1.5 leading-none 
+                        ${gradeClass}" title="${titleGrade} 등급">
+                        ${titleGrade}
+                    </span>
+                `;
+
+                const titleEffect = title.effect 
+                    ? `<span class="inline-block text-xs font-semibold px-2 py-0.5 bg-indigo-900/40 text-indigo-300 rounded-full">${title.effect}</span>` 
+                    : '';
+                
+                let titleIconHtml = `<span class="w-4 mr-1 text-base text-red-500">${title.icon || '🏅'}</span>`;
+
+                return `
+                    <div class="flex justify-between items-center text-xs border-b border-gray-700 py-1.5 last:border-b-0">
+                        <div class="flex items-center truncate">
+                            ${titleIconHtml}
+                            ${gradeTag}
+                            <span class="truncate font-medium text-white">${title.name}</span>
+                            ${equippedTag}
+                        </div>
+                        ${titleEffect}
+                    </div>
+                `;
+            }).join('');
+        }
+
+
+        // --- 10. 초기화 실행 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initAndAuthenticate();
+            if (!window.location.hash) {
+                window.location.hash = '#ranking';
+            }
+        });
+    </script>
+</body>
+</html>
