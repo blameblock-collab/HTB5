@@ -213,23 +213,13 @@
         const MOCK_ADMIN_PASSWORD = "admin123"; 
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        const ALL_RESISTANCES = ["태양", "파도", "폭풍", "대지", "밤"];
-        const STAT_NAMES = ["근력", "지능", "민첩", "행운", "이성"];
-        
-        const ALLOWED_AFFILIATIONS = ["헌터관리청", "백두 길드", "무소속"]; 
-        const FILTERABLE_AFFILIATIONS = ALLOWED_AFFILIATIONS; 
-        const FILTERABLE_RANKS = ['S', 'A', 'B', 'C', 'D', 'F']; 
-        
-        const RARITY_STYLES = {
-            '일반': { key: 'common', color: 'text-gray-400', gradeClass: 'text-gray-400' },
-            '레어': { key: 'rare', color: 'text-blue-400', gradeClass: 'text-blue-400' },
-            '유니크': { key: 'unique', color: 'text-purple-400', gradeClass: 'grade-unique-text' }, 
-            '레전더리': { key: 'legendary', color: 'text-yellow-400', gradeClass: 'grade-legendary-text' },
-            '미스틱': { key: 'mystic', class: 'grade-mystic-text', gradeClass: 'grade-mystic-text' } 
-        };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBO-3p4z_yX7AkcEgsKPejNL5U_3E2NSsg",
+            authDomain: "htb5-3fb42.firebaseapp.com",
+            projectId: "htb5-3fb42",
+            storageBucket: "htb5-3fb42.firebasestorage.app",
+            messagingSenderId: "264435552693",
+            appId: "1:264435552693:web:50d7730e9d71a3cf5709fc",
         
         // --- 2. 칭호 메타데이터 정의 (새로 추가) ---
         const ALL_TITLES = {
